@@ -1,9 +1,18 @@
-import { lightFormat, parse, getUnixTime, isSameDay, addDays } from "date-fns";
+import {
+  lightFormat,
+  parse,
+  getUnixTime,
+  isSameDay,
+  addDays,
+  subDays,
+  isBefore,
+} from "date-fns";
 
 const AMBITO_API =
   "https://mercados.ambito.com/dolar/informal/historico-general";
 const BLUELYTICS_API = "https://api.bluelytics.com.ar/v2/latest";
 const COINGECKO_API = "https://api.coingecko.com/api/v3";
+const MIN_DATE = parse("2013-04-27", "yyyy-MM-dd", new Date());
 const now = new Date(Date.now());
 
 export interface Price {
@@ -15,28 +24,35 @@ export async function getUsdArs(
   from: Date = now,
   to: Date = now
 ): Promise<Price[]> {
-  let fromFormatted = lightFormat(from, "dd-MM-yyyy");
-  let toFormatted = lightFormat(to, "dd-MM-yyyy");
-  let nowFormatted = lightFormat(now, "dd-MM-yyyy");
-  let today = await fetch(BLUELYTICS_API)
-    .then((res) => res.json())
-    .then((res) => {
-      let price: Price = {
-        date: now,
-        value: parseFloat(res.blue.value_sell),
-      };
-      return price;
-    });
-  if (fromFormatted === nowFormatted && toFormatted === nowFormatted) {
-    return [today];
-  } else {
-    let url = `${AMBITO_API}/${fromFormatted}/${toFormatted}`;
-    return await fetch(url)
+  if (isBefore(to, from)) {
+    throw new Error("Invalid date arguments");
+  }
+  if (isSameDay(from, now) && isSameDay(to, now)) {
+    return await fetch(BLUELYTICS_API)
       .then((res) => res.json())
       .then((res) => {
+        let price: Price = {
+          date: now,
+          value: parseFloat(res.blue.value_sell),
+        };
+        return [price];
+      });
+  } else {
+    const retry = async () => {
+      let retry = await getUsdArs(subDays(from, 1), to);
+      retry.pop();
+      return retry;
+    };
+    let url = `${AMBITO_API}/${lightFormat(from, "dd-MM-yyyy")}/${lightFormat(
+      addDays(to, 1),
+      "dd-MM-yyyy"
+    )}`;
+    return await fetch(url)
+      .then((res) => res.json())
+      .then(async (res) => {
         res.shift();
         if (res.length === 0) {
-          throw new Error("Invalid date arguments");
+          return retry();
         }
         let prices = res.map((item: string[]) => {
           let price: Price = {
@@ -45,20 +61,44 @@ export async function getUsdArs(
           };
           return price;
         });
-        prices.unshift(today);
-        // prices.forEach((actual: any, index: any) => {
-        //   if (index !== prices.length - 1) {
-        //     let tomorrow = addDays(actual.date, 1);
-        //     let next = prices[index + 1].date;
-        //     if (next !== tomorrow) {
-        //       let nextPrice: Price = {
-        //         date: tomorrow,
-        //         value: actual.value,
-        //       };
-        //       prices.splice(index + 1, 0, nextPrice);
-        //     }
-        //   }
-        // });
+        // Debajo hago doble .reverse() porque es más fácil debuggear
+        prices.reverse();
+        for (let index = 0; index < prices.length; index++) {
+          const actual = prices[index];
+          const last = prices.length - 1;
+          if (index !== prices.length - 1) {
+            let tomorrow = addDays(actual.date, 1);
+            let next: Date = prices[index + 1].date;
+            // Hay fechas que están duplicadas
+            if (isSameDay(actual.date, next)) {
+              prices.splice(index + 1, 1);
+              continue;
+            }
+            // Lleno info en fechas vacías con el último precio
+            if (!isSameDay(tomorrow, next)) {
+              let filledPrice: Price = {
+                date: tomorrow,
+                value: actual.value,
+              };
+              prices.splice(index + 1, 0, filledPrice);
+            }
+          }
+          if (
+            index === prices.length - 1 &&
+            !isSameDay(prices[last].date, to)
+          ) {
+            let filledPrice: Price = {
+              date: addDays(prices[last].date, 1),
+              value: actual.value,
+            };
+            prices.splice(index + 1, 0, filledPrice);
+            continue;
+          }
+        }
+        if (!isSameDay(prices[0].date, from)) {
+          return retry();
+        }
+        prices.reverse();
         return prices;
       });
   }
@@ -79,10 +119,7 @@ export async function getBtcUsd(
   from: Date = now,
   to: Date = now
 ): Promise<Price[]> {
-  let fromFormatted = lightFormat(from, "dd-MM-yyyy");
-  let toFormatted = lightFormat(to, "dd-MM-yyyy");
-  let nowFormatted = lightFormat(now, "dd-MM-yyyy");
-  if (fromFormatted === nowFormatted && toFormatted === nowFormatted) {
+  if (isSameDay(from, now) && isSameDay(to, now)) {
     return await fetch(
       `${COINGECKO_API}/simple/price?ids=bitcoin&vs_currencies=usd`
     )

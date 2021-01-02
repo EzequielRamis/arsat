@@ -5,7 +5,10 @@ import { parse } from "date-fns";
 function App() {
   const [data, setData] = useState<Price[]>([]);
   useEffect(() => {
-    getUsdArs(parse("28-12-2020", "dd-MM-yyyy", new Date()))
+    getUsdArs(
+      parse("01-01-2019", "dd-MM-yyyy", new Date()),
+      parse("31-12-2019", "dd-MM-yyyy", new Date())
+    )
       .then((res) => {
         console.log(res);
         setData(res);
