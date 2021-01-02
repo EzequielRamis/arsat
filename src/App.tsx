@@ -1,20 +1,21 @@
 import { useState, useEffect } from "react";
-import { getArsSat, Price } from "./prices";
 import { parse, subWeeks } from "date-fns";
+import { Price } from "./utils";
+import axios from "axios";
 
 function App() {
-  const [data, setData] = useState<Price[]>([]);
   useEffect(() => {
-    getArsSat(11, subWeeks(Date.now(), 1).getTime())
+    axios
+      .get("/api/prices/usdars?from=1608336000")
+      .then((res) => res.data)
       .then((res) => {
-        let prices = res.map((price) => {
+        let prices = res.map((price: Price) => {
           return {
             date: new Date(price.date),
             value: price.value,
           };
         });
         console.log("arsat", prices);
-        // setData(res);
       })
       .catch((err) => console.log(err));
   }, []);

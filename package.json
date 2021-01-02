@@ -6,6 +6,7 @@
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
+    "axios": "^0.21.1",
     "date-fns": "^2.16.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -48,5 +49,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@vercel/node": "^1.8.5"
   }
 }
