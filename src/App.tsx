@@ -1,17 +1,20 @@
 import { useState, useEffect } from "react";
-import { getUsdArs, Price } from "./prices";
-import { parse } from "date-fns";
+import { getArsSat, Price } from "./prices";
+import { parse, subWeeks } from "date-fns";
 
 function App() {
   const [data, setData] = useState<Price[]>([]);
   useEffect(() => {
-    getUsdArs(
-      parse("01-01-2019", "dd-MM-yyyy", new Date()),
-      parse("31-12-2019", "dd-MM-yyyy", new Date())
-    )
+    getArsSat(11, subWeeks(Date.now(), 1).getTime())
       .then((res) => {
-        console.log(res);
-        setData(res);
+        let prices = res.map((price) => {
+          return {
+            date: new Date(price.date),
+            value: price.value,
+          };
+        });
+        console.log("arsat", prices);
+        // setData(res);
       })
       .catch((err) => console.log(err));
   }, []);
