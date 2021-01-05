@@ -7,6 +7,7 @@ import {
   addDays,
   subDays,
   isBefore,
+  differenceInDays,
 } from "date-fns";
 import { NowRequest, NowResponse } from "@vercel/node";
 import get from "axios";
@@ -118,6 +119,7 @@ async function getUsdArs(
     };
     return price;
   });
+  if (differenceInDays(to, now) > 0) to = now;
   if (isSameDay(from, now) && isSameDay(to, now)) return [today];
   else {
     const retry = async () => {

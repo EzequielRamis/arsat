@@ -12,7 +12,7 @@ export const MIN_DATE = parse("2013-04-30", "yyyy-MM-dd", new Date());
 export const now = Date.now();
 
 export interface Price {
-  date: number;
+  date: Date;
   value: number;
 }
 
@@ -41,12 +41,9 @@ export enum TimeRange {
   Max = MIN_DATE.getTime(),
 }
 
-export function skip(s: number, p: Price[]) {
-  if (s === 1) return p;
-  let f: Price[] = [];
-  for (var i = p.length - 1; i >= 0; i -= s) {
-    f.unshift(p[i]);
-  }
-  f = f.filter((e) => e !== undefined);
-  return f;
+export function step(s: number, p: Price[]) {
+  return p
+    .reverse()
+    .filter((v, i, a) => i % s === 0)
+    .reverse();
 }
