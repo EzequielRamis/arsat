@@ -4,7 +4,6 @@ import { Price, Pair, TimeRange, step } from "./utils";
 import get from "axios";
 import { Chart, yScaleT, ChartTheme, Curve } from "./Chart";
 import { genDateValue } from "@visx/mock-data";
-// import { parseISO } from "date-fns";
 
 async function getPrices(p: Pair, r: TimeRange): Promise<Price[]> {
   return await get(`/api/prices/${p}?from=${r}`).then((res) => res.data);
@@ -39,7 +38,7 @@ function setPrices(
 function App() {
   const [data, setData] = useState<Price[]>([]);
   const [chartTheme, setChartTheme] = useState<ChartTheme>(ChartTheme.Blue);
-  const [timerange, setTimerange] = useState<TimeRange>(TimeRange.Month);
+  // const [timerange, setTimerange] = useState<TimeRange>(TimeRange.Month);
   const [curve, setCurve] = useState<Curve>(Curve.Linear);
   const [scale, setScale] = useState<yScaleT>(yScaleT.Linear);
   const updateData = (n: number) => {
@@ -56,8 +55,8 @@ function App() {
   };
 
   useEffect(() => {
-    const [pair, ts] = [Pair.BTCUSD, TimeRange.TwoYears];
-    setPrices(pair, ts, 10, setData);
+    const [pair, ts] = [Pair.BTCUSD, TimeRange.Month];
+    setPrices(pair, ts, 20, setData);
   }, []);
 
   return (
