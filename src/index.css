@@ -1,3 +1,8 @@
+:root {
+  --color-01: #241f3d;
+  --color-02: #fff;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
@@ -5,10 +10,22 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #241f3d;
+  background: var(--color-01);
 }
 
 #root {
   width: 100%;
   height: 100vh;
+}
+
+.visx-axis text {
+  fill: var(--color-02);
+}
+
+.axis-y text {
+  text-anchor: end;
+}
+
+.visx-rows line {
+  opacity: 0.1;
 }

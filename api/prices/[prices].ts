@@ -16,7 +16,8 @@ const AMBITO_API =
   "https://mercados.ambito.com/dolar/informal/historico-general";
 const BLUELYTICS_API = "https://api.bluelytics.com.ar/v2/latest";
 const COINGECKO_API = "https://api.coingecko.com/api/v3";
-const MIN_DATE = parse("2013-04-30", "yyyy-MM-dd", new Date());
+const ARS_MIN_DATE = parse("2002-01-11", "yyyy-MM-dd", new Date());
+const BTC_MIN_DATE = parse("2013-04-30", "yyyy-MM-dd", new Date());
 const now = Date.now();
 
 interface Price {
@@ -43,7 +44,7 @@ export default async function (req: NowRequest, res: NowResponse) {
   let { from, to } = req.query;
   const f = from ? parseInt(from.toString()) : now;
   const t = to ? parseInt(to.toString()) : now;
-  if (queryError(f, t, res)) res.end();
+  if (queryError(f, t, pair, res)) res.end();
   (async (p) => {
     switch (p) {
       case Pair.USDARS:
@@ -84,19 +85,21 @@ export default async function (req: NowRequest, res: NowResponse) {
     });
 }
 
-function queryError(from: number, to: number, res: NowResponse) {
-  if (from.toString().length < 13 || to.toString().length < 13) {
+function queryError(from: number, to: number, pair: Pair, res: NowResponse) {
+  if (pair === Pair.USDARS || pair === Pair.ARSUSD) {
+    if (isBefore(from, ARS_MIN_DATE)) {
+      res.status(404).json({
+        error:
+          "There is no data about Peso before " +
+          lightFormat(ARS_MIN_DATE, "yyyy-MM-dd"),
+      });
+      return true;
+    }
+  } else if (isBefore(from, BTC_MIN_DATE)) {
     res.status(404).json({
       error:
-        "Invalid date format. More info: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTime",
-    });
-    return true;
-  }
-  if (isBefore(from, MIN_DATE)) {
-    res.status(404).json({
-      error:
-        "Invalid 'from' date argument. It must be after " +
-        lightFormat(MIN_DATE, "yyyy-MM-dd"),
+        "There is no data about Bitcoin before " +
+        lightFormat(BTC_MIN_DATE, "yyyy-MM-dd"),
     });
     return true;
   }
@@ -106,6 +109,7 @@ function queryError(from: number, to: number, res: NowResponse) {
     });
     return true;
   }
+  return false;
 }
 
 async function getUsdArs(
@@ -122,11 +126,6 @@ async function getUsdArs(
   if (differenceInDays(to, now) > 0) to = now;
   if (isSameDay(from, now) && isSameDay(to, now)) return [today];
   else {
-    const retry = async () => {
-      let r = await getUsdArs(subDays(from, 1).getTime(), to);
-      r.shift();
-      return r;
-    };
     let url = `${AMBITO_API}/${lightFormat(from, "dd-MM-yyyy")}/${lightFormat(
       addDays(to, 1),
       "dd-MM-yyyy"
@@ -135,7 +134,7 @@ async function getUsdArs(
       .then((res) => res.data)
       .then((res: any) => {
         res.shift();
-        if (res.length === 0) return retry();
+        if (res.length === 0) return retry(from, to);
         let prices = res
           .map((item: string[]) => {
             let price: Price = {
@@ -145,7 +144,7 @@ async function getUsdArs(
             return price;
           })
           .reverse();
-        if (!isSameDay(prices[0].date, from)) return retry();
+        if (!isSameDay(prices[0].date, from)) return retry(from, to);
         for (let index = 0; index < prices.length; index++) {
           const actual = prices[index];
           const last = prices.length - 1;
@@ -178,6 +177,12 @@ async function getUsdArs(
         return prices;
       });
   }
+}
+
+async function retry(from: number, to: number) {
+  let r = await getUsdArs(subDays(from, 1).getTime(), to);
+  r.shift();
+  return r;
 }
 
 async function getBtcUsd(
@@ -248,79 +253,66 @@ async function getBtcArs(
   return btcars;
 }
 
+function mapValue(p: Price[], m: Function) {
+  p.forEach((price) => {
+    price.value = m(price.value);
+  });
+  return p;
+}
+
+function inverse(p: Price[]) {
+  return mapValue(p, (v: number) => 1 / v);
+}
+
+function satoshi(p: Price[]) {
+  return mapValue(p, (v: number) => v / Math.pow(10, 8));
+}
+
 async function getSatUsd(
   from: number = now,
   to: number = now
 ): Promise<Price[]> {
-  const res = await getBtcUsd(from, to);
-  res.forEach((price) => {
-    price.value = price.value / Math.pow(10, 8);
-  });
-  return res;
+  return satoshi(await getBtcUsd(from, to));
 }
 
 async function getSatArs(
   from: number = now,
   to: number = now
 ): Promise<Price[]> {
-  const res = await getBtcArs(from, to);
-  res.forEach((price) => {
-    price.value = price.value / Math.pow(10, 8);
-  });
-  return res;
+  return satoshi(await getBtcArs(from, to));
 }
 
 async function getArsUsd(
   from: number = now,
   to: number = now
 ): Promise<Price[]> {
-  const res = await getUsdArs(from, to);
-  res.forEach((price) => {
-    price.value = 1 / price.value;
-  });
-  return res;
+  return inverse(await getUsdArs(from, to));
 }
 
 async function getUsdBtc(
   from: number = now,
   to: number = now
 ): Promise<Price[]> {
-  const res = await getBtcUsd(from, to);
-  res.forEach((price) => {
-    price.value = 1 / price.value;
-  });
-  return res;
+  return inverse(await getBtcUsd(from, to));
 }
 
 async function getArsBtc(
   from: number = now,
   to: number = now
 ): Promise<Price[]> {
-  const res = await getBtcArs(from, to);
-  res.forEach((price) => {
-    price.value = 1 / price.value;
-  });
-  return res;
+  return inverse(await getBtcArs(from, to));
 }
 
 async function getUsdSat(
   from: number = now,
   to: number = now
 ): Promise<Price[]> {
-  const res = await getSatUsd(from, to);
-  res.forEach((price) => {
-    price.value = 1 / price.value;
-  });
-  return res;
+  return inverse(await getSatUsd(from, to));
 }
 
 async function getArsSat(
   from: number = now,
   to: number = now
 ): Promise<Price[]> {
-  const res = await getSatArs(from, to);
-  res.forEach((price) => {
-    price.value = 1 / price.value;
-  });
-  return res;
+  return inverse(await getSatArs(from, to));
 }

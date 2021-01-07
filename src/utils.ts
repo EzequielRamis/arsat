@@ -8,7 +8,8 @@ import {
   parse,
 } from "date-fns";
 
-export const MIN_DATE = parse("2013-04-30", "yyyy-MM-dd", new Date());
+export const ARS_MIN_DATE = parse("2002-01-11", "yyyy-MM-dd", new Date());
+export const BTC_MIN_DATE = parse("2013-04-30", "yyyy-MM-dd", new Date());
 export const now = Date.now();
 
 export interface Price {
@@ -35,10 +36,13 @@ export enum TimeRange {
   Month = subMonths(now, 1).getTime(),
   Quarter = subQuarters(now, 1).getTime(),
   Semester = subQuarters(now, 2).getTime(),
-  Ytd = startOfYear(now).getTime(),
   Year = subYears(now, 1).getTime(),
+  TwoYears = subYears(now, 2).getTime(),
   FiveYears = subYears(now, 5).getTime(),
-  Max = MIN_DATE.getTime(),
+  TenYears = subYears(now, 10).getTime(),
+  Ytd = startOfYear(now).getTime(),
+  ArsMax = ARS_MIN_DATE.getTime(),
+  BtcMax = BTC_MIN_DATE.getTime(),
 }
 
 export function step(s: number, p: Price[]) {
