@@ -44,6 +44,7 @@ function App() {
 
   useEffect(() => {
     setPrices(pair[0], pair[1], timerange);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function setPrices(base: Coin, quote: Coin, r: TimeRange) {
