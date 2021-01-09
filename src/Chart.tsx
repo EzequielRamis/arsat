@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback } from "react";
 import { Price, multiFormat, formatPrice } from "./utils";
 import { extent, bisector } from "d3-array";
@@ -104,7 +103,7 @@ export function Chart({
   const yScaleLinearFormat = yScaleLinear.tickFormat(10, "s");
   const yScaleLogFormat = yScaleLog.tickFormat(8, ".2s");
 
-  const [yScale, yScaleFormat] =
+  const [yScale] =
     yScaleType === yScaleT.Linear
       ? [yScaleLinear, yScaleLinearFormat]
       : [yScaleLog, yScaleLogFormat];
@@ -113,7 +112,7 @@ export function Chart({
   const yA = (p: Price) => yScale(p.value);
 
   const curveT = ((c: Curve) => {
-    switch (curve) {
+    switch (c) {
       case Curve.Linear:
         return curveLinear;
       case Curve.Natural:
@@ -159,7 +158,7 @@ export function Chart({
         tooltipTop: yScale(d.value),
       });
     },
-    [showTooltip, xScale, yScale]
+    [showTooltip, xScale, yScale, data]
   );
 
   return (
