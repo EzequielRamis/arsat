@@ -1,9 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback } from "react";
-import { Price } from "./utils";
+import { Price, multiFormat, formatPrice } from "./utils";
 import { extent, bisector } from "d3-array";
-import { Spring } from "react-spring/renderprops";
-import { AnimatedAxis, AnimatedGridRows } from "@visx/react-spring";
+import { Axis } from "@visx/axis";
 import { scaleLinear, scaleTime, scaleLog } from "@visx/scale";
 import { AreaClosed, Area, Line, Bar } from "@visx/shape";
 import { Group } from "@visx/group";
@@ -19,9 +18,8 @@ import {
 } from "@visx/tooltip";
 import { localPoint } from "@visx/event";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { format as d3Format } from "d3-format";
-import * as d3T from "d3-time";
+import { useTheme, Text } from "@geist-ui/react";
+import { es } from "date-fns/esm/locale";
 
 type TooltipData = Price;
 
@@ -29,7 +27,7 @@ const x = (p: Price) => p.date;
 const y = (p: Price) => p.value;
 const bisectDate = bisector<Price, Date>((p) => new Date(p.date)).left;
 
-export type ChartProps = {
+type ChartProps = {
   width: number;
   height: number;
   margin?: Margin;
@@ -58,43 +56,12 @@ type Margin = {
 
 export enum ChartTheme {
   Orange = "#f7931a",
-  Red = " #e0245e",
+  Red = " #ea3e5b",
   Blue = "#00aaff",
-  Green = " #00d588",
+  Green = " #34e6b0",
 }
 
 const lineWidth = 3;
-
-const formatMillisecond = ".SS",
-  formatSecond = ":ss",
-  formatMinute = "HH:mm",
-  formatHour = "HH 'hs'",
-  formatDay = "dd LLL",
-  formatWeek = "dd LLL",
-  formatMonth = "LLL",
-  formatYear = "yyyy";
-
-function multiFormat(date: Date) {
-  return format(
-    date,
-    d3T.timeSecond(date) < date
-      ? formatMillisecond
-      : d3T.timeMinute(date) < date
-      ? formatSecond
-      : d3T.timeHour(date) < date
-      ? formatMinute
-      : d3T.timeDay(date) < date
-      ? formatHour
-      : d3T.timeMonth(date) < date
-      ? d3T.timeWeek(date) < date
-        ? formatDay
-        : formatWeek
-      : d3T.timeYear(date) < date
-      ? formatMonth
-      : formatYear,
-    { locale: es }
-  );
-}
 
 export function Chart({
   width,
@@ -105,6 +72,7 @@ export function Chart({
   chartTheme,
   curve = Curve.Linear,
 }: ChartProps) {
+  const { palette } = useTheme();
   margin.top = margin.top ?? 0;
   margin.bottom = margin.bottom ?? 0;
   margin.left = margin.left ?? 0;
@@ -124,7 +92,7 @@ export function Chart({
   const yScaleConfig = {
     range: [innerHeight + (margin.top ?? 0), margin.top],
     domain: [minY, maxY],
-    nice: true,
+    nice: false,
   };
 
   const yScaleLinear = scaleLinear(yScaleConfig);
@@ -133,8 +101,8 @@ export function Chart({
   const dateFormat = (d: Date) => format(d, "dd LLL yyyy", { locale: es });
 
   const xScaleFormat = (d: any) => multiFormat(d.getTime());
-  const yScaleLinearFormat = yScaleLinear.tickFormat(1, "s");
-  const yScaleLogFormat = yScaleLog.tickFormat(0, ".0s");
+  const yScaleLinearFormat = yScaleLinear.tickFormat(10, "s");
+  const yScaleLogFormat = yScaleLog.tickFormat(8, ".2s");
 
   const [yScale, yScaleFormat] =
     yScaleType === yScaleT.Linear
@@ -143,13 +111,6 @@ export function Chart({
 
   const xA = (p: Price) => xScale(p.date);
   const yA = (p: Price) => yScale(p.value);
-
-  const animateData = (props: number[]) => {
-    return data.map((p: Price, i: number) => ({
-      ...p,
-      value: props[i],
-    }));
-  };
 
   const curveT = ((c: Curve) => {
     switch (curve) {
@@ -172,7 +133,7 @@ export function Chart({
     tooltipOpen: true,
     tooltipLeft: width / 3,
     tooltipTop: height / 3,
-    tooltipData: { date: new Date(), value: 0 },
+    tooltipData: undefined,
   });
 
   const handleTooltip = useCallback(
@@ -191,6 +152,7 @@ export function Chart({
             ? d1
             : d0;
       }
+      d = d ?? { date: new Date(Date.now()), value: 0 };
       showTooltip({
         tooltipData: d,
         tooltipLeft: x,
@@ -201,109 +163,102 @@ export function Chart({
   );
 
   return (
-    <div>
+    <div className='chart-wrapper'>
       <svg width={width} height={height}>
         <ClipPath id='clip-pattern'>
           <rect x={0} y={0} width={width} height={height} />
         </ClipPath>
-        <Spring to={{ chartTheme }}>
-          {(props) => (
-            <>
-              <PatternLines
-                id='area-pattern'
-                height={20}
-                width={20}
-                stroke={`${chartTheme}0A`}
-                strokeWidth={lineWidth}
-                orientation={["diagonal"]}
-                background='var(--color-01)'
-              />
-              <LinearGradient
-                id='line-gradient'
-                from={props.chartTheme}
-                to={props.chartTheme}
-                fromOpacity={0.2}
-                toOpacity={1}
-                vertical={false}
-              />
-              <LinearGradient
-                id='area-gradient'
-                from={props.chartTheme}
-                to={props.chartTheme}
-                fromOpacity={0.5}
-                toOpacity={0}
-              />
-            </>
-          )}
-        </Spring>
+        <PatternLines
+          id='area-pattern'
+          height={15}
+          width={15}
+          stroke={`${chartTheme}0A`}
+          strokeWidth={lineWidth}
+          orientation={["diagonal"]}
+          background={palette.background}
+        />
+        <LinearGradient
+          id='line-gradient'
+          from={chartTheme}
+          to={chartTheme}
+          fromOpacity={0.2}
+          toOpacity={1}
+          vertical={false}
+        />
+        <LinearGradient
+          id='area-gradient'
+          from={chartTheme}
+          to={chartTheme}
+          fromOpacity={0.5}
+          toOpacity={0}
+        />
+        <defs>
+          <linearGradient id='date-gradient'>
+            <stop offset='0%' stopColor={palette.background} stopOpacity='1' />
+            <stop offset='30%' stopColor={palette.background} stopOpacity='0' />
+            <stop offset='70%' stopColor={palette.background} stopOpacity='0' />
+            <stop
+              offset='100%'
+              stopColor={palette.background}
+              stopOpacity='1'
+            />
+          </linearGradient>
+        </defs>
         <Group>
-          <Spring to={data.map(y)}>
-            {(props) => {
-              const animatedData = animateData(props);
-              return (
-                <>
-                  <AreaClosed
-                    id='chart'
-                    data={animatedData}
-                    yScale={yScale}
-                    x={xA}
-                    y={yA}
-                    curve={curveT}
-                    shapeRendering='optimizeSpeed'
-                  />
-                  <use
-                    clipPath='url(#clip-pattern)'
-                    xlinkHref='#chart'
-                    fill='url(#area-pattern)'
-                  />
-                  <use
-                    clipPath='url(#clip-pattern)'
-                    xlinkHref='#chart'
-                    fill={"url(#area-gradient)"}
-                  />
-                  <Area
-                    data={animatedData}
-                    x={xA}
-                    y={yA}
-                    stroke={"url(#line-gradient)"}
-                    strokeWidth={lineWidth}
-                    curve={curveT}
-                  />
-                </>
-              );
-            }}
-          </Spring>
+          <AreaClosed
+            id='chart'
+            data={data}
+            yScale={yScale}
+            x={xA}
+            y={yA}
+            curve={curveT}
+            shapeRendering='optimizeSpeed'
+          />
+          <use
+            clipPath='url(#clip-pattern)'
+            xlinkHref='#chart'
+            fill='url(#area-pattern)'
+          />
+          <use
+            clipPath='url(#clip-pattern)'
+            xlinkHref='#chart'
+            fill={"url(#area-gradient)"}
+          />
+          <Area
+            data={data}
+            x={xA}
+            y={yA}
+            stroke={"url(#line-gradient)"}
+            strokeWidth={lineWidth}
+            curve={curveT}
+          />
         </Group>
         <Group>
-          <AnimatedAxis
-            axisClassName='axis-y'
-            scale={yScale}
-            orientation='left'
-            left={margin.left}
-            hideAxisLine={true}
-            hideTicks={true}
-            animationTrajectory='min'
-            numTicks={4}
-            tickFormat={yScaleFormat}
-          />
-          <AnimatedAxis
+          <Axis
             axisClassName='axis-x'
             scale={xScale}
             orientation='bottom'
-            top={innerHeight + margin.top}
+            top={innerHeight + margin.top + 10}
             hideAxisLine={true}
             hideTicks={true}
-            animationTrajectory='max'
+            rangePadding={100}
+            numTicks={3}
             tickFormat={xScaleFormat}
+            tickClassName='tick-date'
+            tickComponent={({ x, y, formattedValue }) => (
+              <g>
+                <text x={x} y={y} fill={palette.accents_6}>
+                  {formattedValue}
+                </text>
+              </g>
+            )}
           />
-          <AnimatedGridRows
-            scale={yScale}
+          <Bar
+            x={margin.left}
+            y={innerHeight + margin.top + 15}
             width={innerWidth}
-            stroke='var(--color-02)'
-            strokeWidth={1}
-            animationTrajectory='min'
-            left={margin.left}
-            numTicks={4}
+            height={20}
+            fill='url(#date-gradient)'
           />
         </Group>
         <Bar
@@ -323,29 +278,18 @@ export function Chart({
             <Line
               from={{ x: tooltipLeft, y: margin.top }}
               to={{ x: tooltipLeft, y: innerHeight + margin.top }}
-              stroke='var(--color-02)'
+              stroke={palette.foreground}
               strokeWidth={2}
               pointerEvents='none'
-              strokeDasharray='5,2'
+              opacity={0.25}
             />
             <circle
               cx={tooltipLeft}
-              cy={tooltipTop}
-              r={4}
-              fill='black'
-              fillOpacity={0.1}
-              stroke='black'
-              strokeOpacity={0.1}
-              strokeWidth={2}
-              pointerEvents='none'
-            />
-            <circle
-              cx={tooltipLeft}
-              cy={tooltipTop}
-              r={4}
-              fill='var(--color-02)'
-              stroke='white'
-              strokeWidth={2}
+              cy={tooltipTop - 1.5}
+              r={6}
+              fill={palette.background}
+              stroke={chartTheme}
+              strokeWidth={lineWidth}
               pointerEvents='none'
             />
           </Group>
@@ -355,21 +299,25 @@ export function Chart({
         <div>
           <TooltipWithBounds
             key={Math.random()}
-            top={tooltipTop - 12}
-            left={tooltipLeft + 12}
+            top={tooltipTop - 48}
+            left={tooltipLeft + 4}
             style={defaultStyles}>
-            {d3Format(".0f")(y(tooltipData))}
+            {formatPrice(y(tooltipData))}
           </TooltipWithBounds>
           <Tooltip
-            top={innerHeight + margin.top - 14}
-            left={tooltipLeft}
+            top={innerHeight + margin.bottom - 15}
+            left={-10}
             style={{
               ...defaultStyles,
-              minWidth: 72,
               textAlign: "center",
-              transform: "translateX(-50%)",
+              background: "transparent",
+              width: "100%",
+              boxShadow: "none",
+              padding: 0,
             }}>
-            {dateFormat(x(tooltipData))}
+            <Text h5={true} style={{ color: palette.accents_8 }}>
+              {dateFormat(x(tooltipData))}
+            </Text>
           </Tooltip>
         </div>
       )}

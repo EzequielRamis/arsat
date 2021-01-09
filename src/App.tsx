@@ -1,93 +1,99 @@
 import { ParentSize } from "@visx/responsive";
 import { useState, useEffect } from "react";
-import { Price, Pair, TimeRange, step } from "./utils";
+import {
+  Price,
+  Coin,
+  TimeRange,
+  lightPalette,
+  darkPalette,
+  step,
+} from "./utils";
 import get from "axios";
 import { Chart, yScaleT, ChartTheme, Curve } from "./Chart";
-import { genDateValue } from "@visx/mock-data";
+import { Info } from "./Info";
+import {
+  Button,
+  ButtonGroup,
+  GeistProvider,
+  CssBaseline,
+} from "@geist-ui/react";
 
-async function getPrices(p: Pair, r: TimeRange): Promise<Price[]> {
-  return await get(`/api/prices/${p}?from=${r}`).then((res) => res.data);
-}
-
-function randomEnum<T>(anEnum: T): T[keyof T] {
-  const enumValues = (Object.values(anEnum) as unknown) as T[keyof T][];
-  const randomIndex = Math.floor(Math.random() * enumValues.length);
-  return enumValues[randomIndex];
-}
-
-function setPrices(
-  p: Pair,
-  r: TimeRange,
-  s: number,
-  setData: React.Dispatch<React.SetStateAction<Price[]>>
-) {
-  getPrices(p, r)
-    .then((res) => {
-      const prices = res.map((price) => {
-        return {
-          date: new Date(price.date),
-          value: price.value,
-        };
-      });
-      console.log(p, prices);
-      setData(step(s, prices));
-    })
-    .catch((err) => console.error(err));
+async function getPrices(
+  base: Coin,
+  quote: Coin,
+  r: TimeRange
+): Promise<Price[]> {
+  return await get(`/api/prices/${base}${quote}?from=${r}`).then(
+    (res) => res.data
+  );
 }
 
 function App() {
   const [data, setData] = useState<Price[]>([]);
-  const [chartTheme, setChartTheme] = useState<ChartTheme>(ChartTheme.Blue);
-  // const [timerange, setTimerange] = useState<TimeRange>(TimeRange.Month);
-  const [curve, setCurve] = useState<Curve>(Curve.Linear);
+  const [niceData, setNiceData] = useState<Price[]>([]);
+  const chartTheme = ChartTheme.Orange;
+  const pair: [Coin, Coin] = [Coin.USD, Coin.ARS];
+  const timerange = TimeRange.Year;
+  const curve = Curve.Natural;
   const [scale, setScale] = useState<yScaleT>(yScaleT.Linear);
-  const updateData = (n: number) => {
-    const values = genDateValue(n);
-    console.log(values);
-    const prices = values.map((p) => {
-      const price: Price = {
-        date: p.date,
-        value: p.value,
-      };
-      return price;
-    });
-    setData(step(1, prices));
-  };
+  const [theme, setTheme] = useState("light");
+  // const [chartTheme, setChartTheme] = useState<ChartTheme>(ChartTheme.Orange);
+  // const [pair, setPair] = useState<[Coin, Coin]>([Coin.USD, Coin.ARS]);
+  // const [timerange, setTimerange] = useState<TimeRange>(TimeRange.Year);
+  // const [curve, setCurve] = useState<Curve>(Curve.Natural);
 
   useEffect(() => {
-    const [pair, ts] = [Pair.BTCUSD, TimeRange.Month];
-    setPrices(pair, ts, 20, setData);
+    setPrices(pair[0], pair[1], timerange);
   }, []);
 
+  function setPrices(base: Coin, quote: Coin, r: TimeRange) {
+    getPrices(base, quote, r)
+      .then((res) => {
+        const prices = res.map((price) => {
+          return {
+            date: new Date(price.date),
+            value: price.value,
+          };
+        });
+        const nice = step(1, prices);
+        setData(prices);
+        setNiceData(nice);
+      })
+      .catch((err) => console.error(err));
+  }
+
   return (
-    <>
-      <button onClick={() => updateData(20)}>Update chart</button>
-      <ParentSize>
-        {({ width, height }) => (
-          <Chart
-            width={width}
-            height={height}
-            data={data}
-            yScaleType={scale}
-            chartTheme={chartTheme}
-            margin={{
-              bottom: height * 0.15,
-              left: width * 0.15,
-              right: width * 0.15,
-              top: height * 0.15,
-            }}
-            curve={curve}
-          />
-        )}
-      </ParentSize>
-      <button onClick={() => setScale(yScaleT.Linear)}>Linear</button>
-      <button onClick={() => setScale(yScaleT.Log)}>Log</button>
-      <button onClick={() => setCurve(Curve.Linear)}>Curve Linear</button>
-      <button onClick={() => setCurve(Curve.Natural)}>Curve Natural</button>
-      <button onClick={() => setChartTheme(randomEnum(ChartTheme))}>
-        Color
-      </button>
-    </>
+    <GeistProvider
+      theme={{ palette: theme === "light" ? lightPalette : darkPalette }}>
+      <CssBaseline />
+      <main>
+        <Info data={data} pair={pair} range={timerange} />
+        <div className='chart'>
+          <ParentSize className='chart-responsive'>
+            {({ width, height }) => (
+              <Chart
+                width={width}
+                height={height}
+                data={niceData}
+                yScaleType={scale}
+                chartTheme={chartTheme}
+                margin={{
+                  bottom: 75,
+                  top: 25,
+                }}
+                curve={curve}
+              />
+            )}
+          </ParentSize>
+        </div>
+        <ButtonGroup>
+          <Button onClick={() => setScale(yScaleT.Linear)}>Linear</Button>
+          <Button onClick={() => setScale(yScaleT.Log)}>Log</Button>
+          <Button onClick={() => setTheme("light")}>Light</Button>
+          <Button onClick={() => setTheme("dark")}>Dark</Button>
+        </ButtonGroup>
+      </main>
+    </GeistProvider>
   );
 }
 

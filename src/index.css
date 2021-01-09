@@ -18,14 +18,48 @@ body {
   height: 100vh;
 }
 
-.visx-axis text {
-  fill: var(--color-02);
+main {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.axis-y text {
-  text-anchor: end;
+.chart {
+  height: 70vh;
 }
 
-.visx-rows line {
-  opacity: 0.1;
+.chart-responsive {
+  box-sizing: border-box;
+  padding: 0rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-wrapper {
+  position: relative;
+}
+
+.info {
+  padding: 2rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.info-name,
+.info-change {
+  margin: 0;
+}
+
+.info-price {
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.tick-date text {
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-anchor: middle;
 }
