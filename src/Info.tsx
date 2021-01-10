@@ -18,9 +18,9 @@ type InfoProps = {
 
 export function Info({ data, pair, range }: InfoProps) {
   const { palette } = useTheme();
-  const price = data[0]?.value;
+  const price = data[data.length - 1]?.value;
   const priceFormatted = formatPrice(price);
-  const [from, to] = [data[data.length - 1]?.value, price];
+  const [from, to] = [data[0]?.value, price];
   const change = (to - from) / from;
   const perChange = formatChange(change);
   const distance = formatDistanceToNow(range, {

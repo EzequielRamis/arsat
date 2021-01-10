@@ -1,7 +1,8 @@
 import React, { useCallback } from "react";
-import { Price, multiFormat, formatPrice } from "./utils";
+import { Price, multiFormat, formatPrice, step as skip } from "./utils";
 import { extent, bisector } from "d3-array";
 import { Axis } from "@visx/axis";
+import { GridRows } from "@visx/grid";
 import { scaleLinear, scaleTime, scaleLog } from "@visx/scale";
 import { AreaClosed, Area, Line, Bar } from "@visx/shape";
 import { Group } from "@visx/group";
@@ -17,7 +18,8 @@ import {
 } from "@visx/tooltip";
 import { localPoint } from "@visx/event";
 import { format } from "date-fns";
-import { useTheme, Text } from "@geist-ui/react";
+import { useTheme, Text as GText } from "@geist-ui/react";
+import { Text } from "@visx/text";
 import { es } from "date-fns/esm/locale";
 
 type TooltipData = Price;
@@ -34,6 +36,7 @@ type ChartProps = {
   yScaleType: yScaleT;
   chartTheme: ChartTheme;
   curve?: Curve;
+  step?: number;
 };
 
 export enum yScaleT {
@@ -70,6 +73,7 @@ export function Chart({
   yScaleType = yScaleT.Linear,
   chartTheme,
   curve = Curve.Linear,
+  step = 1,
 }: ChartProps) {
   const { palette } = useTheme();
   margin.top = margin.top ?? 0;
@@ -77,10 +81,12 @@ export function Chart({
   margin.left = margin.left ?? 0;
   margin.right = margin.right ?? 0;
 
+  const stepped = step <= 1 ? data : skip(step, data);
+
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
 
-  const [minX, maxX] = extent(data, x) as [Date, Date];
+  const [minX, maxX] = extent(stepped, x) as [Date, Date];
   const [minY, maxY] = extent(data, y) as [number, number];
 
   const xScale = scaleTime({
@@ -94,19 +100,16 @@ export function Chart({
     nice: false,
   };
 
-  const yScaleLinear = scaleLinear(yScaleConfig);
+  const yScaleLinear = scaleLinear({ ...yScaleConfig, nice: true });
   const yScaleLog = scaleLog(yScaleConfig);
 
   const dateFormat = (d: Date) => format(d, "dd LLL yyyy", { locale: es });
 
   const xScaleFormat = (d: any) => multiFormat(d.getTime());
-  const yScaleLinearFormat = yScaleLinear.tickFormat(10, "s");
-  const yScaleLogFormat = yScaleLog.tickFormat(8, ".2s");
+  // const yScaleLinearFormat = yScaleLinear.tickFormat(10, "s");
+  // const yScaleLogFormat = yScaleLog.tickFormat(8, ".2s");
 
-  const [yScale] =
-    yScaleType === yScaleT.Linear
-      ? [yScaleLinear, yScaleLinearFormat]
-      : [yScaleLog, yScaleLogFormat];
+  const yScale = yScaleType === yScaleT.Linear ? yScaleLinear : yScaleLog;
 
   const xA = (p: Price) => xScale(p.date);
   const yA = (p: Price) => yScale(p.value);
@@ -141,9 +144,9 @@ export function Chart({
     ) => {
       const { x } = localPoint(event) || { x: 0 };
       const x0 = xScale.invert(x);
-      const index = bisectDate(data, x0, 1);
-      const d0 = data[index - 1];
-      const d1 = data[index];
+      const index = bisectDate(stepped, x0, 1);
+      const d0 = stepped[index - 1];
+      const d1 = stepped[index];
       let d = d0;
       if (d1 && d1.date) {
         d =
@@ -158,8 +161,10 @@ export function Chart({
         tooltipTop: yScale(d.value),
       });
     },
-    [showTooltip, xScale, yScale, data]
+    [showTooltip, xScale, yScale, stepped]
   );
+
+  const [minPrice, maxPrice] = [yScale(minY), yScale(maxY)];
 
   return (
     <div className='chart-wrapper'>
@@ -206,7 +211,7 @@ export function Chart({
         <Group>
           <AreaClosed
             id='chart'
-            data={data}
+            data={stepped}
             yScale={yScale}
             x={xA}
             y={yA}
@@ -224,7 +229,7 @@ export function Chart({
             fill={"url(#area-gradient)"}
           />
           <Area
-            data={data}
+            data={stepped}
             x={xA}
             y={yA}
             stroke={"url(#line-gradient)"}
@@ -233,11 +238,54 @@ export function Chart({
           />
         </Group>
         <Group>
+          <GridRows
+            scale={yScale}
+            width={innerWidth}
+            stroke={palette.accents_2}
+            strokeWidth={1}
+            strokeDasharray='4'
+            left={margin.left}
+            numTicks={4}
+          />
+          <Group>
+            <Group>
+              <Line
+                from={{ x: 0, y: maxPrice }}
+                to={{ x: width, y: maxPrice }}
+                stroke={palette.accents_4}
+                strokeWidth={1}
+                strokeDasharray={4}
+              />
+              <Line
+                from={{ x: 0, y: minPrice }}
+                to={{ x: width, y: minPrice }}
+                stroke={palette.accents_4}
+                strokeWidth={1}
+                strokeDasharray={4}
+              />
+            </Group>
+            <Group>
+              <Text
+                x={10}
+                y={maxPrice - 10}
+                fill={palette.accents_6}
+                fontSize={14}>
+                {formatPrice(maxY)}
+              </Text>
+              <Text
+                x={10}
+                y={minPrice + 25}
+                fill={palette.accents_6}
+                fontSize={14}>
+                {formatPrice(minY)}
+              </Text>
+            </Group>
+          </Group>
           <Axis
             axisClassName='axis-x'
             scale={xScale}
             orientation='bottom'
-            top={innerHeight + margin.top + 10}
+            top={innerHeight + margin.top + 30}
             hideAxisLine={true}
             hideTicks={true}
             rangePadding={100}
@@ -253,9 +301,9 @@ export function Chart({
             )}
           />
           <Bar
-            x={margin.left}
-            y={innerHeight + margin.top + 15}
-            width={innerWidth}
+            x={0}
+            y={innerHeight + margin.top + 35}
+            width={width}
             height={20}
             fill='url(#date-gradient)'
           />
@@ -275,12 +323,11 @@ export function Chart({
         {tooltipData && (
           <Group>
             <Line
-              from={{ x: tooltipLeft, y: margin.top }}
-              to={{ x: tooltipLeft, y: innerHeight + margin.top }}
-              stroke={palette.foreground}
-              strokeWidth={2}
+              from={{ x: tooltipLeft, y: maxPrice }}
+              to={{ x: tooltipLeft, y: minPrice }}
               pointerEvents='none'
-              opacity={0.25}
+              stroke={palette.accents_3}
+              strokeWidth={1}
             />
             <circle
               cx={tooltipLeft}
@@ -304,7 +351,7 @@ export function Chart({
             {formatPrice(y(tooltipData))}
           </TooltipWithBounds>
           <Tooltip
-            top={innerHeight + margin.bottom - 15}
+            top={innerHeight + margin.top + 60}
             left={-10}
             style={{
               ...defaultStyles,
@@ -314,9 +361,9 @@ export function Chart({
               boxShadow: "none",
               padding: 0,
             }}>
-            <Text h5={true} style={{ color: palette.accents_8 }}>
+            <GText h5={true} style={{ color: palette.accents_8 }}>
               {dateFormat(x(tooltipData))}
-            </Text>
+            </GText>
           </Tooltip>
         </div>
       )}

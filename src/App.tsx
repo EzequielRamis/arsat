@@ -1,98 +1,68 @@
 import { ParentSize } from "@visx/responsive";
 import { useState, useEffect } from "react";
-import {
-  Price,
-  Coin,
-  TimeRange,
-  lightPalette,
-  darkPalette,
-  step,
-} from "./utils";
-import get from "axios";
+import { Price, Coin, TimeRange } from "./utils";
 import { Chart, yScaleT, ChartTheme, Curve } from "./Chart";
 import { Info } from "./Info";
-import {
-  Button,
-  ButtonGroup,
-  GeistProvider,
-  CssBaseline,
-} from "@geist-ui/react";
+import { GeistProvider, CssBaseline, Loading } from "@geist-ui/react";
+import useAxios from "axios-hooks";
+import { Control } from "./Control";
 
-async function getPrices(
-  base: Coin,
-  quote: Coin,
-  r: TimeRange
-): Promise<Price[]> {
-  return await get(`/api/prices/${base}${quote}?from=${r}`).then(
-    (res) => res.data
-  );
+function getPrices(base: Coin, quote: Coin, r: TimeRange) {
+  return `/api/prices/${base}${quote}?from=${r}`;
 }
 
 function App() {
-  const [data, setData] = useState<Price[]>([]);
-  const [niceData, setNiceData] = useState<Price[]>([]);
-  const chartTheme = ChartTheme.Orange;
-  const pair: [Coin, Coin] = [Coin.USD, Coin.ARS];
-  const timerange = TimeRange.Year;
-  const curve = Curve.Natural;
-  const [scale, setScale] = useState<yScaleT>(yScaleT.Linear);
-  const [theme, setTheme] = useState("light");
-  // const [chartTheme, setChartTheme] = useState<ChartTheme>(ChartTheme.Orange);
-  // const [pair, setPair] = useState<[Coin, Coin]>([Coin.USD, Coin.ARS]);
-  // const [timerange, setTimerange] = useState<TimeRange>(TimeRange.Year);
-  // const [curve, setCurve] = useState<Curve>(Curve.Natural);
+  const [prices, setPrices] = useState<Price[]>([]);
+  const pair: [Coin, Coin] = [Coin.BTC, Coin.USD],
+    timerange = TimeRange.Year,
+    scale = yScaleT.Linear,
+    chartTheme = ChartTheme.Green,
+    curve = Curve.Natural,
+    step = 1;
+  const [{ data, loading }] = useAxios(getPrices(pair[0], pair[1], timerange));
 
   useEffect(() => {
-    setPrices(pair[0], pair[1], timerange);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  function setPrices(base: Coin, quote: Coin, r: TimeRange) {
-    getPrices(base, quote, r)
-      .then((res) => {
-        const prices = res.map((price) => {
+    data &&
+      setPrices(
+        data.map((price: Price) => {
           return {
             date: new Date(price.date),
             value: price.value,
           };
-        });
-        const nice = step(1, prices);
-        setData(prices);
-        setNiceData(nice);
-      })
-      .catch((err) => console.error(err));
-  }
+        })
+      );
+  }, [data]);
 
   return (
-    <GeistProvider
-      theme={{ palette: theme === "light" ? lightPalette : darkPalette }}>
+    <GeistProvider theme={{ type: "light" }}>
       <CssBaseline />
       <main>
-        <Info data={data} pair={pair} range={timerange} />
-        <div className='chart'>
-          <ParentSize className='chart-responsive'>
-            {({ width, height }) => (
-              <Chart
-                width={width}
-                height={height}
-                data={niceData}
-                yScaleType={scale}
-                chartTheme={chartTheme}
-                margin={{
-                  bottom: 75,
-                  top: 25,
-                }}
-                curve={curve}
-              />
-            )}
-          </ParentSize>
-        </div>
-        <ButtonGroup>
-          <Button onClick={() => setScale(yScaleT.Linear)}>Linear</Button>
-          <Button onClick={() => setScale(yScaleT.Log)}>Log</Button>
-          <Button onClick={() => setTheme("light")}>Light</Button>
-          <Button onClick={() => setTheme("dark")}>Dark</Button>
-        </ButtonGroup>
+        {loading && !data ? (
+          <Loading />
+        ) : (
+          <>
+            <Info data={data} pair={pair} range={timerange} />
+            <div className='chart'>
+              <ParentSize className='chart-responsive'>
+                {({ width, height }) => (
+                  <Chart
+                    width={width}
+                    height={height}
+                    data={prices}
+                    yScaleType={scale}
+                    chartTheme={chartTheme}
+                    margin={{
+                      bottom: 90,
+                    }}
+                    curve={curve}
+                    step={step}
+                  />
+                )}
+              </ParentSize>
+            </div>
+            <Control />
+          </>
+        )}
       </main>
     </GeistProvider>
   );

@@ -1085,7 +1085,7 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@babel/runtime@^7.10.2", "@babel/runtime@^7.11.2", "@babel/runtime@^7.3.1", "@babel/runtime@^7.5.5", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.4":
+"@babel/runtime@7.12.5", "@babel/runtime@^7.10.2", "@babel/runtime@^7.11.2", "@babel/runtime@^7.3.1", "@babel/runtime@^7.5.5", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.4":
   version "7.12.5"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.12.5.tgz#410e7e487441e1b360c29be715d870d9b985882e"
   integrity sha512-plcc+hbExy3McchJCEQG3knOsuh3HH+Prx1P6cLIkET/0dLuQDEnrT+s27Axgc9bqfsmNUNHfscgMUdBpC9xfg==
@@ -1172,6 +1172,11 @@
     lodash "^4.17.19"
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
+
+"@geist-ui/react-icons@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@geist-ui/react-icons/-/react-icons-1.0.1.tgz#5da112bbc98216bf05da3aabbd7d21594440b209"
+  integrity sha512-/phre1NwXT0Mrxcq3yb+KksJ16/ykptgxI7+jh5pmDZfxnIMPlBWFBGDK0yw96oi752Wuo24X6+tkWjVe/g5Bg==
 
 "@geist-ui/react@^2.1.0-canary.2":
   version "2.1.0-canary.2"
@@ -2922,6 +2927,14 @@ axe-core@^4.0.2:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.1.1.tgz#70a7855888e287f7add66002211a423937063eaf"
   integrity sha512-5Kgy8Cz6LPC9DJcNb3yjAXTu3XihQgEdnIg50c//zOC/MyLP0Clg+Y8Sh9ZjjnvBrDZU4DgXS9C3T9r4/scGZQ==
+
+axios-hooks@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/axios-hooks/-/axios-hooks-2.2.0.tgz#82393c850efd8a768b9bdca9a66741bf62c586f7"
+  integrity sha512-6/Kl2YczjBdBvJRy2Ohf4p6R5sKrscve+ZY4kDSWLPlrunc+3Yo+xvW9BGMZTSmVzdNji5Pg0sP0sAcIgL/OMg==
+  dependencies:
+    "@babel/runtime" "7.12.5"
+    lru-cache "6.0.0"
 
 axios@^0.21.1:
   version "0.21.1"
@@ -7494,19 +7507,19 @@ lower-case@^2.0.1:
   dependencies:
     tslib "^1.10.0"
 
+lru-cache@6.0.0, lru-cache@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-6.0.0.tgz#6d6fe6570ebd96aaf90fcad1dafa3b2566db3a94"
+  integrity sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==
+  dependencies:
+    yallist "^4.0.0"
+
 lru-cache@^5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-5.1.1.tgz#1da27e6710271947695daf6848e847f01d84b920"
   integrity sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==
   dependencies:
     yallist "^3.0.2"
-
-lru-cache@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-6.0.0.tgz#6d6fe6570ebd96aaf90fcad1dafa3b2566db3a94"
-  integrity sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==
-  dependencies:
-    yallist "^4.0.0"
 
 magic-string@^0.25.0, magic-string@^0.25.7:
   version "0.25.7"

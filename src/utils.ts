@@ -58,10 +58,7 @@ export enum TimeRange {
 }
 
 export function step(s: number, p: Price[]) {
-  return p
-    .reverse()
-    .filter((v, i, a) => i % s === 0)
-    .reverse();
+  return p.reverse().filter((v, i, a) => i % s === 0);
 }
 
 export function randomEnum<T>(anEnum: T): T[keyof T] {

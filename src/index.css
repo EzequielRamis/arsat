@@ -16,6 +16,7 @@ body {
 #root {
   width: 100%;
   height: 100vh;
+  overflow-x: hidden;
 }
 
 main {
@@ -23,11 +24,22 @@ main {
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span,
+small {
+  text-transform: none !important;
 }
 
 .chart {
-  height: 70vh;
+  height: 60vh;
 }
 
 .chart-responsive {
@@ -43,9 +55,7 @@ main {
 }
 
 .info {
-  padding: 2rem;
-  padding-left: 2rem;
-  padding-right: 2rem;
+  padding: 1.5rem 2rem;
 }
 
 .info-name,
@@ -62,4 +72,61 @@ main {
   font-weight: 500;
   font-size: 0.8rem;
   text-anchor: middle;
+}
+
+.control {
+  margin-bottom: 1rem;
+}
+
+.control .btn .icon,
+.backdrop .btn .icon {
+  position: static !important;
+  transform: none !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  margin-bottom: 0.5rem;
+}
+
+.control .btn .icon svg,
+.backdrop .btn .icon svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.control .btn .text,
+.backdrop .btn .text {
+  position: static !important;
+  line-height: 1 !important;
+}
+
+.control .btn-group {
+  margin: 0 1rem !important;
+  width: 4rem;
+}
+
+.control .btn-group .btn {
+  height: 1.8rem;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.control .btn-group .text {
+  margin: 0;
+}
+
+.edit-select {
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-select small {
+  margin-top: 0.5rem;
+}
+
+.about {
+  position: absolute !important;
+  bottom: 0;
+  left: 0;
+  width: 100%;
 }
