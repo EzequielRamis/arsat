@@ -79,7 +79,7 @@ export default async function (req: NowRequest, res: NowResponse) {
       else res.json(prices);
     })
     .catch((error) => {
-      res.status(404).json({
+      res.json({
         error,
       });
     });

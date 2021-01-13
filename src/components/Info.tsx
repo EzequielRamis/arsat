@@ -1,35 +1,32 @@
 import {
-  Coin,
   TimeRange,
   Price,
-  name,
-  formatPrice,
-  formatChange,
-} from "./utils";
-import { formatDistanceToNow } from "date-fns";
+  Pair,
+  BTC_MIN_DATE,
+  ARS_MIN_DATE,
+} from "../utils/types";
+import { name, formatPrice, formatChange, formatRange } from "../utils/formats";
+import { includesBtc, pChange } from "../utils/helpers";
 import { useTheme, Text, Grid } from "@geist-ui/react";
-import { es } from "date-fns/esm/locale";
 
 type InfoProps = {
   data: Price[];
-  pair: [Coin, Coin];
+  pair: Pair;
   range: TimeRange;
 };
 
-export function Info({ data, pair, range }: InfoProps) {
+export function Info({
+  data = [{ date: new Date(), value: 0 }],
+  pair,
+  range,
+}: InfoProps) {
   const { palette } = useTheme();
   const price = data[data.length - 1]?.value;
   const priceFormatted = formatPrice(price);
-  const [from, to] = [data[0]?.value, price];
-  const change = (to - from) / from;
+  const change = pChange(data);
   const perChange = formatChange(change);
-  const distance = formatDistanceToNow(range, {
-    locale: es,
-    addSuffix: false,
-  })
-    .replace("alrededor de ", "")
-    .replace("casi ", "")
-    .replace("más de ", "");
+  const firstDate = (includesBtc(pair) ? BTC_MIN_DATE : ARS_MIN_DATE).getTime();
+  const distance = range !== TimeRange.Max ? range : formatRange(firstDate);
   return (
     <Grid.Container className='info' direction='column' alignItems='center'>
       <Text h5={true} className='info-name'>

@@ -24,7 +24,7 @@ main {
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 h1,
@@ -33,7 +33,6 @@ h3,
 h4,
 h5,
 h6,
-span,
 small {
   text-transform: none !important;
 }
@@ -75,7 +74,7 @@ small {
 }
 
 .control {
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
 }
 
 .control .btn .icon,
@@ -129,4 +128,12 @@ small {
   bottom: 0;
   left: 0;
   width: 100%;
+}
+
+.toast .message {
+  word-break: normal !important;
+}
+
+.fetch-error {
+  margin: auto 1rem;
 }

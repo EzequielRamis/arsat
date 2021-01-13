@@ -1,6 +1,11 @@
 import React, { useCallback } from "react";
-import { Price, multiFormat, formatPrice, step as skip } from "./utils";
+import { Price } from "../utils/types";
+import { multiFormat, formatPrice } from "../utils/formats";
+import { step as skip } from "../utils/helpers";
 import { extent, bisector } from "d3-array";
+import { format } from "date-fns";
+import { useTheme, Text as GText } from "@geist-ui/react";
+import { es } from "date-fns/esm/locale";
 import { Axis } from "@visx/axis";
 import { GridRows } from "@visx/grid";
 import { scaleLinear, scaleTime, scaleLog } from "@visx/scale";
@@ -9,7 +14,7 @@ import { Group } from "@visx/group";
 import { LinearGradient } from "@visx/gradient";
 import { PatternLines } from "@visx/pattern";
 import { ClipPath } from "@visx/clip-path";
-import { curveLinear, curveNatural } from "@visx/curve";
+import { curveLinear, curveMonotoneX } from "@visx/curve";
 import {
   useTooltip,
   TooltipWithBounds,
@@ -17,10 +22,7 @@ import {
   defaultStyles,
 } from "@visx/tooltip";
 import { localPoint } from "@visx/event";
-import { format } from "date-fns";
-import { useTheme, Text as GText } from "@geist-ui/react";
 import { Text } from "@visx/text";
-import { es } from "date-fns/esm/locale";
 
 type TooltipData = Price;
 
@@ -46,7 +48,7 @@ export enum yScaleT {
 
 export enum Curve {
   Linear,
-  Natural,
+  Smooth,
 }
 
 type Margin = {
@@ -100,7 +102,7 @@ export function Chart({
     nice: false,
   };
 
-  const yScaleLinear = scaleLinear({ ...yScaleConfig, nice: true });
+  const yScaleLinear = scaleLinear(yScaleConfig);
   const yScaleLog = scaleLog(yScaleConfig);
 
   const dateFormat = (d: Date) => format(d, "dd LLL yyyy", { locale: es });
@@ -118,8 +120,8 @@ export function Chart({
     switch (c) {
       case Curve.Linear:
         return curveLinear;
-      case Curve.Natural:
-        return curveNatural;
+      case Curve.Smooth:
+        return curveMonotoneX;
       default:
         return curveLinear;
     }
@@ -182,14 +184,6 @@ export function Chart({
           background={palette.background}
         />
         <LinearGradient
-          id='line-gradient'
-          from={chartTheme}
-          to={chartTheme}
-          fromOpacity={0.2}
-          toOpacity={1}
-          vertical={false}
-        />
-        <LinearGradient
           id='area-gradient'
           from={chartTheme}
           to={chartTheme}
@@ -232,7 +226,7 @@ export function Chart({
             data={stepped}
             x={xA}
             y={yA}
-            stroke={"url(#line-gradient)"}
+            stroke={chartTheme}
             strokeWidth={lineWidth}
             curve={curveT}
           />
@@ -346,8 +340,14 @@ export function Chart({
           <TooltipWithBounds
             key={Math.random()}
             top={tooltipTop - 48}
-            left={tooltipLeft + 4}
-            style={defaultStyles}>
+            left={tooltipLeft + 1}
+            style={{
+              ...defaultStyles,
+              color: palette.foreground,
+              background: palette.background,
+              border: "1px solid",
+              borderColor: palette.accents_3,
+            }}>
             {formatPrice(y(tooltipData))}
           </TooltipWithBounds>
           <Tooltip
