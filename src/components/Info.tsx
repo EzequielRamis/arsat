@@ -15,13 +15,9 @@ type InfoProps = {
   range: TimeRange;
 };
 
-export function Info({
-  data = [{ date: new Date(), value: 0 }],
-  pair,
-  range,
-}: InfoProps) {
+export function Info({ data, pair, range }: InfoProps) {
   const { palette } = useTheme();
-  const price = data[data.length - 1]?.value;
+  const price = data.length === 0 ? 0 : data[data.length - 1].value;
   const priceFormatted = formatPrice(price);
   const change = pChange(data);
   const perChange = formatChange(change);

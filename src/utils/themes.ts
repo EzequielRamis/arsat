@@ -56,6 +56,13 @@
 // //   warningLighter: "#cc7014",
 // // };
 
+export enum ChartTheme {
+  Orange = "#f7931a",
+  Red = " #ea3e5b",
+  Blue = "#00aaff",
+  Green = " #34e6b0",
+}
+
 export type CSS = Partial<React.CSSProperties>;
 
 export const btn: CSS = {

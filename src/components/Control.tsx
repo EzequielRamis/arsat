@@ -16,8 +16,10 @@ import { name } from "../utils/formats";
 import { useState } from "react";
 
 type ControlProps = {
-  setPair: (p: Pair) => void;
-  setTime: (t: TimeRange) => void;
+  initialPair: Pair;
+  initialTime: TimeRange;
+  updatePair: (p: Pair) => void;
+  updateTime: (t: TimeRange) => void;
 };
 
 const pairOptions = Object.values(Coin).map((c: Coin) => (
@@ -32,33 +34,38 @@ const timeOptions = Object.values(TimeRange).map((t: TimeRange) => (
   </Select.Option>
 ));
 
-export function Control({ setPair, setTime }: ControlProps) {
+export function Control({
+  initialPair,
+  initialTime,
+  updatePair,
+  updateTime,
+}: ControlProps) {
   const edit = useModal();
   const [, setToast] = useToasts();
   const openEdit = () => edit.setVisible(true);
   const closeEdit = () => edit.setVisible(false);
 
-  const [actualPair, updatePair] = useState<Pair>([Coin.USD, Coin.ARS]),
-    [actualTime, updateTime] = useState<TimeRange>(TimeRange.Year);
+  const [actualPair, setActualPair] = useState<Pair>(initialPair),
+    [actualTime, setActualTime] = useState<TimeRange>(initialTime);
 
   const handleBaseSelect = (val: string | string[]) => {
     const c = Coin[val as keyof typeof Coin];
     const p = [c, actualPair[1]] as Pair;
-    updatePair(p);
+    setActualPair(p);
   };
 
   const handleQuoteSelect = (val: string | string[]) => {
     const c = Coin[val as keyof typeof Coin];
     const p = [actualPair[0], c] as Pair;
-    updatePair(p);
+    setActualPair(p);
   };
 
   const handleInterchange = () => {
-    updatePair([...actualPair.reverse()] as Pair);
+    setActualPair([actualPair[1], actualPair[0]] as Pair);
   };
 
   const handleTimeSelect = (val: string | string[]) =>
-    updateTime(val as TimeRange);
+    setActualTime(val as TimeRange);
 
   const handleSubmit = () => {
     if (actualPair.includes(Coin.BTC) && actualPair.includes(Coin.SAT)) {
@@ -76,16 +83,17 @@ export function Control({ setPair, setTime }: ControlProps) {
     } else if (
       actualPair.includes(Coin.USD) &&
       actualPair.includes(Coin.ARS) &&
-      actualTime === TimeRange.Day
+      (actualTime === TimeRange.Day || actualTime === TimeRange.Week)
     ) {
       setToast({
         delay: 5000,
-        text: "Intentá con un rango de tiempo mayor a 24 horas para este par.",
+        text:
+          "Intentá con un rango de tiempo mayor a una semana para este par.",
       });
     } else {
       closeEdit();
-      setPair(actualPair);
-      setTime(actualTime);
+      updatePair(actualPair);
+      updateTime(actualTime);
     }
   };
 

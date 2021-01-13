@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import { Price } from "../utils/types";
 import { multiFormat, formatPrice } from "../utils/formats";
 import { step as skip } from "../utils/helpers";
+import { ChartTheme } from "../utils/themes";
 import { extent, bisector } from "d3-array";
 import { format } from "date-fns";
 import { useTheme, Text as GText } from "@geist-ui/react";
@@ -14,7 +15,7 @@ import { Group } from "@visx/group";
 import { LinearGradient } from "@visx/gradient";
 import { PatternLines } from "@visx/pattern";
 import { ClipPath } from "@visx/clip-path";
-import { curveLinear, curveMonotoneX } from "@visx/curve";
+import { curveStep, curveMonotoneX, curveLinear } from "@visx/curve";
 import {
   useTooltip,
   TooltipWithBounds,
@@ -49,6 +50,7 @@ export enum yScaleT {
 export enum Curve {
   Linear,
   Smooth,
+  Step,
 }
 
 type Margin = {
@@ -57,13 +59,6 @@ type Margin = {
   left?: number;
   right?: number;
 };
-
-export enum ChartTheme {
-  Orange = "#f7931a",
-  Red = " #ea3e5b",
-  Blue = "#00aaff",
-  Green = " #34e6b0",
-}
 
 const lineWidth = 3;
 
@@ -108,8 +103,6 @@ export function Chart({
   const dateFormat = (d: Date) => format(d, "dd LLL yyyy", { locale: es });
 
   const xScaleFormat = (d: any) => multiFormat(d.getTime());
-  // const yScaleLinearFormat = yScaleLinear.tickFormat(10, "s");
-  // const yScaleLogFormat = yScaleLog.tickFormat(8, ".2s");
 
   const yScale = yScaleType === yScaleT.Linear ? yScaleLinear : yScaleLog;
 
@@ -122,8 +115,10 @@ export function Chart({
         return curveLinear;
       case Curve.Smooth:
         return curveMonotoneX;
+      case Curve.Step:
+        return curveStep;
       default:
-        return curveLinear;
+        break;
     }
   })(curve);
 
@@ -235,7 +230,7 @@ export function Chart({
           <GridRows
             scale={yScale}
             width={innerWidth}
-            stroke={palette.accents_2}
+            stroke={palette.accents_3}
             strokeWidth={1}
             strokeDasharray='4'
             left={margin.left}

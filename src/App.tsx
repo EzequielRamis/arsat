@@ -2,7 +2,7 @@ import { ParentSize } from "@visx/responsive";
 import { useState, useEffect } from "react";
 import { Price, Coin, TimeRange, Pair } from "./utils/types";
 import { getPrices } from "./utils/helpers";
-import { Chart, yScaleT, ChartTheme, Curve } from "./components/Chart";
+import { Chart, yScaleT, Curve } from "./components/Chart";
 import { Info } from "./components/Info";
 import {
   GeistProvider,
@@ -12,9 +12,10 @@ import {
   Row,
   Button,
   ButtonGroup,
+  useTheme,
 } from "@geist-ui/react";
 import { Settings, Info as About } from "@geist-ui/react-icons";
-import { btn } from "./utils/themes";
+import { btn, ChartTheme } from "./utils/themes";
 import useAxios from "axios-hooks";
 import { Control } from "./components/Control";
 import { AxiosRequestConfig } from "axios";
@@ -22,40 +23,59 @@ import { AxiosRequestConfig } from "axios";
 const now = Date.now();
 
 function App() {
+  const { palette } = useTheme();
+
+  const [pairBuffer, setPairBuffer] = useState<Pair>([Coin.USD, Coin.ARS]);
+  const [timeBuffer, setTimeBuffer] = useState<TimeRange>(TimeRange.Month);
+
   const [prices, setPrices] = useState<Price[]>([]);
-  const [pair, setPair] = useState<Pair>([Coin.ARS, Coin.USD]);
-  const [time, setTime] = useState<TimeRange>(TimeRange.Month);
-  const scale = yScaleT.Linear,
-    chartTheme = ChartTheme.Green,
+  const [pair, setPair] = useState<Pair>(pairBuffer);
+  const [time, setTime] = useState<TimeRange>(timeBuffer);
+
+  const [scale, setScale] = useState<yScaleT>(yScaleT.Linear);
+
+  const chartTheme = ChartTheme.Green,
     curve = Curve.Smooth,
     step = 1;
-  const [{ data, loading, error }, refetch] = useAxios(
-    getPrices(pair, time, now)
+  const [{ loading, error }, refetch] = useAxios(
+    getPrices(pairBuffer, timeBuffer, now)
   );
 
   useEffect(() => {
-    data &&
-      setPrices(
-        data.map((price: Price) => {
-          return {
-            date: new Date(price.date),
-            value: price.value,
-          };
-        })
-      );
-  }, [data]);
+    refetch(getPrices(pairBuffer, timeBuffer, Date.now()) as AxiosRequestConfig)
+      .then(({ data }) => {
+        setPrices(
+          data.map((price: Price) => {
+            return {
+              date: new Date(price.date),
+              value: price.value,
+            };
+          })
+        );
+        setPair(pairBuffer);
+        setTime(timeBuffer);
+      })
+      .catch((err) => console.error(err));
+  }, [pairBuffer, timeBuffer, refetch]);
 
-  useEffect(() => {
-    refetch(
-      getPrices(pair, time, Date.now()) as AxiosRequestConfig
-    ).catch((err) => console.error(err));
-  }, [pair, time, refetch]);
+  const scaleSelected = (s: yScaleT) => {
+    if (s === scale)
+      return {
+        color: palette.background,
+        backgroundColor: palette.success,
+      };
+    else
+      return {
+        color: palette.success,
+        backgroundColor: "transparent",
+      };
+  };
 
   return (
-    <GeistProvider theme={{ type: "dark" }}>
+    <GeistProvider theme={{ type: "light" }}>
       <CssBaseline />
       <main>
-        {loading ? (
+        {loading && prices.length === 0 ? (
           <Loading />
         ) : error ? (
           <Note type='error' label='error' filled className='fetch-error'>
@@ -63,7 +83,12 @@ function App() {
           </Note>
         ) : (
           <>
-            <Info data={data} pair={pair} range={time} />
+            {loading && (
+              <div className='refetch-loading'>
+                <Loading />
+              </div>
+            )}
+            <Info data={prices} pair={pair} range={time} />
             <div className='chart'>
               <ParentSize className='chart-responsive'>
                 {({ width, height }) => (
@@ -89,14 +114,27 @@ function App() {
           <Button icon={<Settings />} style={btn}>
             Ajustes
           </Button>
-          <Control setPair={setPair} setTime={setTime} />
+          <Control
+            updatePair={setPairBuffer}
+            updateTime={setTimeBuffer}
+            initialPair={pairBuffer}
+            initialTime={timeBuffer}
+          />
           <ButtonGroup
             vertical={true}
             size='medium'
             type='success'
             ghost={true}>
-            <Button>Log</Button>
-            <Button>Linear</Button>
+            <Button
+              style={scaleSelected(yScaleT.Log)}
+              onClick={() => setScale(yScaleT.Log)}>
+              Log
+            </Button>
+            <Button
+              style={scaleSelected(yScaleT.Linear)}
+              onClick={() => setScale(yScaleT.Linear)}>
+              Linear
+            </Button>
           </ButtonGroup>
         </Row>
         <Row justify='end' className='about'>

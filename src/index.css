@@ -1,8 +1,3 @@
-:root {
-  --color-01: #241f3d;
-  --color-02: #fff;
-}
-
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
@@ -10,7 +5,6 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: var(--color-01);
 }
 
 #root {
@@ -25,16 +19,6 @@ main {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-small {
-  text-transform: none !important;
 }
 
 .chart {
@@ -77,6 +61,18 @@ small {
   margin-bottom: 2rem;
 }
 
+/* geist rewrites */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+small {
+  text-transform: none !important;
+}
+
 .control .btn .icon,
 .backdrop .btn .icon {
   position: static !important;
@@ -103,6 +99,19 @@ small {
   width: 4rem;
 }
 
+.about {
+  position: absolute !important;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.toast .message {
+  word-break: normal !important;
+}
+
+/* geist rewrites */
+
 .control .btn-group .btn {
   height: 1.8rem;
   display: flex;
@@ -123,17 +132,23 @@ small {
   margin-top: 0.5rem;
 }
 
-.about {
-  position: absolute !important;
-  bottom: 0;
+.fetch-error {
+  margin: auto 1rem;
+}
+
+.refetch-loading {
+  position: absolute;
+  top: 0;
   left: 0;
   width: 100%;
 }
 
-.toast .message {
-  word-break: normal !important;
+.refetch-loading .loading-container {
+  display: flex !important;
 }
 
-.fetch-error {
-  margin: auto 1rem;
+.refetch-loading .loading {
+  position: static !important;
+  margin: 1rem;
+  justify-content: flex-end !important;
 }
