@@ -18,7 +18,7 @@ import {
 } from "./types";
 
 export function step(s: number, p: Price[]) {
-  return p.reverse().filter((_v, i, _a) => i % s === 0);
+  return p.filter((_v, i, _a) => i % s === 0);
 }
 
 export function randomEnum<T>(anEnum: T): T[keyof T] {
@@ -86,4 +86,12 @@ export function dynChartTheme(pair: Pair) {
   else if (pair.includes(Coin.SAT) && pair.includes(Coin.ARS))
     return ChartTheme.Red;
   else return ChartTheme.Orange;
+}
+
+export function inverse<T>(arr: T[]) {
+  let newArray = [];
+  for (let i = arr.length - 1; i >= 0; i--) {
+    newArray.push(arr[i]);
+  }
+  return newArray;
 }
