@@ -1,6 +1,6 @@
 {
   "short_name": "Arsat",
-  "name": "Create React App Sample",
+  "name": "Arsat: El precio del bitcoin en pesos y más",
   "icons": [
     {
       "src": "manifest-icon-192.png",
@@ -21,7 +21,7 @@
     }
   ],
   "start_url": ".",
-  "display": "fullscreen",
+  "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#3C91D4"
 }
