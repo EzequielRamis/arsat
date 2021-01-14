@@ -1,7 +1,12 @@
 import { ParentSize } from "@visx/responsive";
 import { useState, useEffect } from "react";
 import { Price, Coin, TimeRange, Pair } from "./utils/types";
-import { getPrices } from "./utils/helpers";
+import {
+  dynChartTheme,
+  dynStep,
+  getPrices,
+  includesBtc,
+} from "./utils/helpers";
 import { Chart, yScaleT, Curve } from "./components/Chart";
 import { Info } from "./components/Info";
 import {
@@ -97,13 +102,14 @@ function App() {
                     height={height}
                     data={prices}
                     yScaleType={scale}
-                    chartTheme={chartTheme}
+                    chartTheme={dynChartTheme(pair)}
                     margin={{
                       bottom: 90,
                       top: 20,
                     }}
                     curve={curve}
-                    step={step}
+                    step={dynStep(pair, time)}
+                    day={includesBtc(pair) && time === TimeRange.Day}
                   />
                 )}
               </ParentSize>
@@ -133,7 +139,7 @@ function App() {
             <Button
               style={scaleSelected(yScaleT.Linear)}
               onClick={() => setScale(yScaleT.Linear)}>
-              Linear
+              Lineal
             </Button>
           </ButtonGroup>
         </Row>

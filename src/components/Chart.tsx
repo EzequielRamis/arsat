@@ -40,6 +40,7 @@ type ChartProps = {
   chartTheme: ChartTheme;
   curve?: Curve;
   step?: number;
+  day?: boolean;
 };
 
 export enum yScaleT {
@@ -71,6 +72,7 @@ export function Chart({
   chartTheme,
   curve = Curve.Linear,
   step = 1,
+  day = false,
 }: ChartProps) {
   const { palette } = useTheme();
   margin.top = margin.top ?? 0;
@@ -101,6 +103,7 @@ export function Chart({
   const yScaleLog = scaleLog(yScaleConfig);
 
   const dateFormat = (d: Date) => format(d, "dd LLL yyyy", { locale: es });
+  const dayFormat = (d: Date) => format(d, "HH:mm", { locale: es });
 
   const xScaleFormat = (d: any) => multiFormat(d.getTime());
 
@@ -357,7 +360,7 @@ export function Chart({
               padding: 0,
             }}>
             <GText h5={true} style={{ color: palette.accents_8 }}>
-              {dateFormat(x(tooltipData))}
+              {day ? dayFormat(x(tooltipData)) : dateFormat(x(tooltipData))}
             </GText>
           </Tooltip>
         </div>

@@ -10,10 +10,12 @@ import {
   Spacer,
 } from "@geist-ui/react";
 import { RefreshCcw, TrendingUp } from "@geist-ui/react-icons";
-import { Coin, TimeRange, Pair } from "../utils/types";
+import { Coin, TimeRange, Pair, BTC_MIN_DATE } from "../utils/types";
 import { btn } from "../utils/themes";
 import { name } from "../utils/formats";
 import { useState } from "react";
+import { getFromDate, includesBtc } from "../utils/helpers";
+import { isBefore } from "date-fns";
 
 type ControlProps = {
   initialPair: Pair;
@@ -89,6 +91,16 @@ export function Control({
         delay: 5000,
         text:
           "Intentá con un rango de tiempo mayor a una semana para este par.",
+      });
+    } else if (
+      includesBtc(actualPair) &&
+      actualTime === TimeRange.TenYears &&
+      isBefore(getFromDate(actualPair, actualTime, Date.now()), BTC_MIN_DATE)
+    ) {
+      setToast({
+        delay: 5000,
+        text:
+          "No es posible obtener datos sobre bitcoin de hace 10 años. Intentá con otro rango.",
       });
     } else {
       closeEdit();

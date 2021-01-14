@@ -6,6 +6,7 @@ import {
   subWeeks,
   subYears,
 } from "date-fns";
+import { ChartTheme } from "./themes";
 import {
   ARS_MIN_DATE,
   BTC_MIN_DATE,
@@ -66,4 +67,23 @@ export function getFromDate(p: Pair, t: TimeRange, now: number) {
 export function getPrices(pair: Pair, r: TimeRange, now: number) {
   const from = getFromDate(pair, r, now).getTime();
   return `/api/prices/${pair.join("")}?from=${from}`;
+}
+
+export function dynStep(pair: Pair, time: TimeRange) {
+  if (includesBtc(pair) && time === TimeRange.Month) return 5;
+  if (time === TimeRange.TwoYears) return 2;
+  if (time === TimeRange.FiveYears) return 5;
+  if (time === TimeRange.TenYears) return 10;
+  if (time === TimeRange.Max)
+    if (includesBtc(pair)) return 10;
+    else return 25;
+  return 1;
+}
+
+export function dynChartTheme(pair: Pair) {
+  if (pair.includes(Coin.USD) && pair.includes(Coin.ARS))
+    return ChartTheme.Blue;
+  else if (pair.includes(Coin.SAT) && pair.includes(Coin.ARS))
+    return ChartTheme.Red;
+  else return ChartTheme.Orange;
 }
