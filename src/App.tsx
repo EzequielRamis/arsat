@@ -75,7 +75,7 @@ function App() {
   };
 
   return (
-    <GeistProvider theme={{ type: "dark" }}>
+    <GeistProvider theme={{ type: "light" }}>
       <CssBaseline />
       <main>
         {loading && prices.length === 0 ? (

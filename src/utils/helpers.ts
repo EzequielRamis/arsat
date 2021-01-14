@@ -18,7 +18,7 @@ import {
 } from "./types";
 
 export function step(s: number, p: Price[]) {
-  return p.filter((_v, i, _a) => i % s === 0);
+  return inverse(inverse(p).filter((_v, i, _a) => i % s === 0));
 }
 
 export function randomEnum<T>(anEnum: T): T[keyof T] {
@@ -33,9 +33,6 @@ export function pChange(data: Price[]) {
 }
 
 export const includesBtc = (p: Pair) => isBtc.some((btc) => p.includes(btc));
-
-export const isUsdArs = (p: Pair) =>
-  p.includes(Coin.USD) && p.includes(Coin.ARS);
 
 export function getFromDate(p: Pair, t: TimeRange, now: number) {
   switch (t) {
