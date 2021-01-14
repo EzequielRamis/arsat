@@ -20,7 +20,7 @@ import {
   useTheme,
 } from "@geist-ui/react";
 import { Settings, Info as About } from "@geist-ui/react-icons";
-import { btn, ChartTheme } from "./utils/themes";
+import { btn } from "./utils/themes";
 import useAxios from "axios-hooks";
 import { Control } from "./components/Control";
 import { AxiosRequestConfig } from "axios";
@@ -39,9 +39,7 @@ function App() {
 
   const [scale, setScale] = useState<yScaleT>(yScaleT.Linear);
 
-  const chartTheme = ChartTheme.Green,
-    curve = Curve.Smooth,
-    step = 1;
+  const curve = Curve.Smooth;
   const [{ loading, error }, refetch] = useAxios(
     getPrices(pairBuffer, timeBuffer, now)
   );
