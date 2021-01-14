@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Price } from "../utils/types";
 import { multiFormat, formatPrice } from "../utils/formats";
 import { step as skip } from "../utils/helpers";
@@ -80,7 +80,10 @@ export function Chart({
   margin.left = margin.left ?? 0;
   margin.right = margin.right ?? 0;
 
-  const stepped = step <= 1 ? data : skip(step, data);
+  const stepped = useMemo(() => (step <= 1 ? data : skip(step, data)), [
+    data,
+    step,
+  ]);
 
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
