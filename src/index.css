@@ -25,6 +25,12 @@ main {
   height: 60vh;
 }
 
+@media screen and (min-width: 768px) {
+  .chart {
+    height: 65vh;
+  }
+}
+
 .chart-responsive {
   box-sizing: border-box;
   padding: 0rem;
@@ -38,7 +44,8 @@ main {
 }
 
 .info {
-  padding: 1.5rem 2rem;
+  padding: 2rem;
+  padding-bottom: 0;
 }
 
 .info-name,
@@ -59,6 +66,55 @@ main {
 
 .control {
   margin-bottom: 2rem;
+}
+
+.control .btn-group .btn {
+  height: 1.8rem;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.control .btn-group .text {
+  margin: 0;
+}
+
+.edit-select {
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-select small {
+  margin-top: 0.5rem;
+}
+
+.fetch-error {
+  margin: auto 1rem;
+}
+
+.refetch-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.settings-option {
+  margin-bottom: 1rem;
+}
+
+.radio-group {
+  justify-content: space-evenly;
+}
+
+.radio-group .radio {
+  flex: 1;
+  justify-content: center;
+  text-align: center;
+}
+
+.radio .point {
+  margin: 0 !important;
 }
 
 /* geist rewrites */
@@ -110,39 +166,6 @@ small {
   word-break: normal !important;
 }
 
-/* geist rewrites */
-
-.control .btn-group .btn {
-  height: 1.8rem;
-  display: flex;
-  align-items: center;
-  padding: 0;
-}
-
-.control .btn-group .text {
-  margin: 0;
-}
-
-.edit-select {
-  display: flex;
-  flex-direction: column;
-}
-
-.edit-select small {
-  margin-top: 0.5rem;
-}
-
-.fetch-error {
-  margin: auto 1rem;
-}
-
-.refetch-loading {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-}
-
 .refetch-loading .loading-container {
   display: flex !important;
 }
@@ -152,3 +175,10 @@ small {
   margin: 1rem;
   justify-content: flex-end !important;
 }
+
+.radio .name {
+  flex-direction: column-reverse;
+  font-weight: normal !important;
+}
+
+/* geist rewrites */

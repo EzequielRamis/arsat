@@ -10,26 +10,30 @@ import {
 import { Chart, yScaleT, Curve } from "./components/Chart";
 import { Info } from "./components/Info";
 import {
+  InfoAlign,
+  Settings,
+  Theme,
+  useSettingsInfoAlign,
+  useSettingsTheme,
+} from "./components/Settings";
+import {
   GeistProvider,
   CssBaseline,
   Loading,
   Note,
   Row,
   Button,
-  ButtonGroup,
-  useTheme,
 } from "@geist-ui/react";
-import { Settings, Info as About } from "@geist-ui/react-icons";
-import { btn } from "./utils/themes";
+import { Info as About } from "@geist-ui/react-icons";
+import { btn, day, night, sunset } from "./utils/themes";
 import useAxios from "axios-hooks";
 import { Control } from "./components/Control";
+import { Scale } from "./components/Scale";
 import { AxiosRequestConfig } from "axios";
 
 const now = Date.now();
 
 function App() {
-  const { palette } = useTheme();
-
   const [pairBuffer, setPairBuffer] = useState<Pair>([Coin.USD, Coin.ARS]);
   const [timeBuffer, setTimeBuffer] = useState<TimeRange>(TimeRange.Month);
 
@@ -38,6 +42,9 @@ function App() {
   const [time, setTime] = useState<TimeRange>(timeBuffer);
 
   const [scale, setScale] = useState<yScaleT>(yScaleT.Linear);
+
+  const [theme, setTheme] = useSettingsTheme(Theme.Day);
+  const [infoAlign, setInfoAlign] = useSettingsInfoAlign(InfoAlign.Center);
 
   const curve = Curve.Smooth;
   const [{ loading, error }, refetch] = useAxios(
@@ -61,21 +68,12 @@ function App() {
       .catch((err) => console.error(err));
   }, [pairBuffer, timeBuffer, refetch]);
 
-  const scaleSelected = (s: yScaleT) => {
-    if (s === scale)
-      return {
-        color: palette.background,
-        backgroundColor: palette.success,
-      };
-    else
-      return {
-        color: palette.success,
-        backgroundColor: "transparent",
-      };
-  };
-
   return (
-    <GeistProvider theme={{ type: "light" }}>
+    <GeistProvider
+      theme={{
+        palette:
+          theme === Theme.Day ? day : theme === Theme.Sunset ? sunset : night,
+      }}>
       <CssBaseline />
       <main>
         {loading && prices.length === 0 ? (
@@ -91,7 +89,7 @@ function App() {
                 <Loading />
               </div>
             )}
-            <Info data={prices} pair={pair} range={time} />
+            <Info data={prices} pair={pair} range={time} align={infoAlign} />
             <div className='chart'>
               <ParentSize className='chart-responsive'>
                 {({ width, height }) => (
@@ -103,7 +101,7 @@ function App() {
                     chartTheme={dynChartTheme(pair)}
                     margin={{
                       bottom: 90,
-                      top: 20,
+                      top: 25,
                     }}
                     curve={curve}
                     step={dynStep(pair, time)}
@@ -115,31 +113,15 @@ function App() {
           </>
         )}
         <Row justify='center' align='middle' className='control'>
-          <Button icon={<Settings />} style={btn}>
-            Ajustes
-          </Button>
-          <Control
-            updatePair={setPairBuffer}
-            updateTime={setTimeBuffer}
-            initialPair={pairBuffer}
-            initialTime={timeBuffer}
+          <Settings
+            theme={[theme, setTheme]}
+            infoAlign={[infoAlign, setInfoAlign]}
           />
-          <ButtonGroup
-            vertical={true}
-            size='medium'
-            type='success'
-            ghost={true}>
-            <Button
-              style={scaleSelected(yScaleT.Log)}
-              onClick={() => setScale(yScaleT.Log)}>
-              Log
-            </Button>
-            <Button
-              style={scaleSelected(yScaleT.Linear)}
-              onClick={() => setScale(yScaleT.Linear)}>
-              Lineal
-            </Button>
-          </ButtonGroup>
+          <Control
+            pair={[pairBuffer, setPairBuffer]}
+            time={[timeBuffer, setTimeBuffer]}
+          />
+          <Scale scale={[scale, setScale]} />
         </Row>
         <Row justify='end' className='about'>
           <Button

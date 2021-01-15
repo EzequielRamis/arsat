@@ -18,10 +18,8 @@ import { getFromDate, includesBtc } from "../utils/helpers";
 import { isBefore } from "date-fns";
 
 type ControlProps = {
-  initialPair: Pair;
-  initialTime: TimeRange;
-  updatePair: (p: Pair) => void;
-  updateTime: (t: TimeRange) => void;
+  pair: [Pair, (p: Pair) => void];
+  time: [TimeRange, (t: TimeRange) => void];
 };
 
 const pairOptions = Object.values(Coin).map((c: Coin) => (
@@ -36,19 +34,15 @@ const timeOptions = Object.values(TimeRange).map((t: TimeRange) => (
   </Select.Option>
 ));
 
-export function Control({
-  initialPair,
-  initialTime,
-  updatePair,
-  updateTime,
-}: ControlProps) {
-  const edit = useModal();
-  const [, setToast] = useToasts();
-  const openEdit = () => edit.setVisible(true);
-  const closeEdit = () => edit.setVisible(false);
+export function Control({ pair, time }: ControlProps) {
+  const edit = useModal(),
+    openEdit = () => edit.setVisible(true),
+    closeEdit = () => edit.setVisible(false);
 
-  const [actualPair, setActualPair] = useState<Pair>(initialPair),
-    [actualTime, setActualTime] = useState<TimeRange>(initialTime);
+  const [, setToast] = useToasts();
+
+  const [actualPair, setActualPair] = useState<Pair>(pair[0]),
+    [actualTime, setActualTime] = useState<TimeRange>(time[0]);
 
   const handleBaseSelect = (val: string | string[]) => {
     const c = Coin[val as keyof typeof Coin];
@@ -104,8 +98,8 @@ export function Control({
       });
     } else {
       closeEdit();
-      updatePair(actualPair);
-      updateTime(actualTime);
+      pair[1](actualPair);
+      time[1](actualTime);
     }
   };
 
@@ -120,13 +114,13 @@ export function Control({
           <Row>
             <Col offset={1}>
               <Col className='edit-select'>
-                <Text small={true}>Base</Text>
+                <Text small>Base</Text>
                 <Select value={actualPair[0]} onChange={handleBaseSelect}>
                   {pairOptions}
                 </Select>
               </Col>
               <Col className='edit-select'>
-                <Text small={true}>Cotización</Text>
+                <Text small>Cotización</Text>
                 <Select value={actualPair[1]} onChange={handleQuoteSelect}>
                   {pairOptions}
                 </Select>
@@ -147,7 +141,7 @@ export function Control({
             justify='center'
             gap={1}
             style={{ flexDirection: "column" }}>
-            <Text small={true}>Rango de tiempo</Text>
+            <Text small>Rango de tiempo</Text>
             <Select value={actualTime} onChange={handleTimeSelect}>
               {timeOptions}
             </Select>

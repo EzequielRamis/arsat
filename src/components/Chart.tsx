@@ -281,8 +281,8 @@ export function Chart({
             scale={xScale}
             orientation='bottom'
             top={innerHeight + margin.top + 30}
-            hideAxisLine={true}
-            hideTicks={true}
+            hideAxisLine
+            hideTicks
             rangePadding={100}
             numTicks={3}
             tickFormat={xScaleFormat}
@@ -362,7 +362,7 @@ export function Chart({
               boxShadow: "none",
               padding: 0,
             }}>
-            <GText h5={true} style={{ color: palette.accents_8 }}>
+            <GText h5 style={{ color: palette.accents_8 }}>
               {day ? dayFormat(x(tooltipData)) : dateFormat(x(tooltipData))}
             </GText>
           </Tooltip>
