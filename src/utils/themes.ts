@@ -144,6 +144,7 @@ export const day: GeistUIThemesPalette = {
 };
 
 export enum ChartTheme {
+  Dynamic = "dyn",
   Orange = "#f7931a",
   Red = " #ea3e5b",
   Blue = "#00aaff",

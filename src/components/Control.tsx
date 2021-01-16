@@ -13,7 +13,7 @@ import { RefreshCcw, TrendingUp } from "@geist-ui/react-icons";
 import { Coin, TimeRange, Pair, BTC_MIN_DATE } from "../utils/types";
 import { btn } from "../utils/themes";
 import { name } from "../utils/formats";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getFromDate, includesBtc } from "../utils/helpers";
 import { isBefore } from "date-fns";
 
@@ -23,7 +23,7 @@ type ControlProps = {
 };
 
 const pairOptions = Object.values(Coin).map((c: Coin) => (
-  <Select.Option value={c} key={Coin[c]}>
+  <Select.Option value={c} key={c}>
     {name(c)}
   </Select.Option>
 ));
@@ -44,21 +44,23 @@ export function Control({ pair, time }: ControlProps) {
   const [actualPair, setActualPair] = useState<Pair>(pair[0]),
     [actualTime, setActualTime] = useState<TimeRange>(time[0]);
 
+  useEffect(() => {
+    setActualPair(pair[0]);
+    setActualTime(time[0]);
+  }, [pair, time]);
+
   const handleBaseSelect = (val: string | string[]) => {
-    const c = Coin[val as keyof typeof Coin];
-    const p = [c, actualPair[1]] as Pair;
+    const p = [val as Coin, actualPair[1]] as Pair;
     setActualPair(p);
   };
 
   const handleQuoteSelect = (val: string | string[]) => {
-    const c = Coin[val as keyof typeof Coin];
-    const p = [actualPair[0], c] as Pair;
+    const p = [actualPair[0], val as Coin] as Pair;
     setActualPair(p);
   };
 
-  const handleInterchange = () => {
+  const handleInterchange = () =>
     setActualPair([actualPair[1], actualPair[0]] as Pair);
-  };
 
   const handleTimeSelect = (val: string | string[]) =>
     setActualTime(val as TimeRange);

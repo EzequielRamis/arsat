@@ -9,13 +9,7 @@ import {
 } from "./utils/helpers";
 import { Chart, yScaleT, Curve } from "./components/Chart";
 import { Info } from "./components/Info";
-import {
-  InfoAlign,
-  Settings,
-  Theme,
-  useSettingsInfoAlign,
-  useSettingsTheme,
-} from "./components/Settings";
+import { InfoAlign, Settings, Theme } from "./components/Settings";
 import {
   GeistProvider,
   CssBaseline,
@@ -25,34 +19,41 @@ import {
   Button,
 } from "@geist-ui/react";
 import { Info as About } from "@geist-ui/react-icons";
-import { btn, day, night, sunset } from "./utils/themes";
+import { btn, ChartTheme, day, night, sunset } from "./utils/themes";
 import useAxios from "axios-hooks";
 import { Control } from "./components/Control";
 import { Scale } from "./components/Scale";
 import { AxiosRequestConfig } from "axios";
+import { useIdb } from "./utils/hooks";
 
 const now = Date.now();
 
 function App() {
-  const [pairBuffer, setPairBuffer] = useState<Pair>([Coin.USD, Coin.ARS]);
-  const [timeBuffer, setTimeBuffer] = useState<TimeRange>(TimeRange.Month);
-
   const [prices, setPrices] = useState<Price[]>([]);
-  const [pair, setPair] = useState<Pair>(pairBuffer);
-  const [time, setTime] = useState<TimeRange>(timeBuffer);
 
-  const [scale, setScale] = useState<yScaleT>(yScaleT.Linear);
+  const [pairCache, setPairCache] = useIdb<Pair>("pair", [Coin.ARS, Coin.SAT]);
+  const [timeCache, setTimeCache] = useIdb<TimeRange>("time", TimeRange.Month);
 
-  const [theme, setTheme] = useSettingsTheme(Theme.Day);
-  const [infoAlign, setInfoAlign] = useSettingsInfoAlign(InfoAlign.Center);
+  const [pair, setPair] = useState<Pair>(pairCache);
+  const [time, setTime] = useState<TimeRange>(timeCache);
+
+  const [scale, setScale] = useIdb<yScaleT>("scale", yScaleT.Linear);
+
+  const [theme, setTheme] = useIdb("theme", Theme.Day);
+  const [infoAlign, setInfoAlign] = useIdb("info-align", InfoAlign.Center);
+  const [minmax, setMinmax] = useIdb("min-max", false);
+  const [grid, setGrid] = useIdb("grid", false);
+  const [chartTheme, setChartTheme] = useIdb("chart-theme", ChartTheme.Dynamic);
 
   const curve = Curve.Smooth;
+
   const [{ loading, error }, refetch] = useAxios(
-    getPrices(pairBuffer, timeBuffer, now)
+    getPrices(pairCache, timeCache, now)
   );
 
   useEffect(() => {
-    refetch(getPrices(pairBuffer, timeBuffer, Date.now()) as AxiosRequestConfig)
+    const newNow = Date.now();
+    refetch(getPrices(pairCache, timeCache, newNow) as AxiosRequestConfig)
       .then(({ data }) => {
         setPrices(
           data.map((price: Price) => {
@@ -62,11 +63,11 @@ function App() {
             };
           })
         );
-        setPair(pairBuffer);
-        setTime(timeBuffer);
+        setPair(pairCache);
+        setTime(timeCache);
       })
       .catch((err) => console.error(err));
-  }, [pairBuffer, timeBuffer, refetch]);
+  }, [pairCache, timeCache, refetch]);
 
   return (
     <GeistProvider
@@ -98,7 +99,11 @@ function App() {
                     height={height}
                     data={prices}
                     yScaleType={scale}
-                    chartTheme={dynChartTheme(pair)}
+                    chartTheme={
+                      chartTheme === ChartTheme.Dynamic
+                        ? dynChartTheme(pair)
+                        : chartTheme
+                    }
                     margin={{
                       bottom: 90,
                       top: 25,
@@ -106,6 +111,8 @@ function App() {
                     curve={curve}
                     step={dynStep(pair, time)}
                     day={includesBtc(pair) && time === TimeRange.Day}
+                    minmax={minmax}
+                    grid={grid}
                   />
                 )}
               </ParentSize>
@@ -116,10 +123,13 @@ function App() {
           <Settings
             theme={[theme, setTheme]}
             infoAlign={[infoAlign, setInfoAlign]}
+            minmax={[minmax, setMinmax]}
+            grid={[grid, setGrid]}
+            chartTheme={[chartTheme, setChartTheme]}
           />
           <Control
-            pair={[pairBuffer, setPairBuffer]}
-            time={[timeBuffer, setTimeBuffer]}
+            pair={[pairCache, setPairCache]}
+            time={[timeCache, setTimeCache]}
           />
           <Scale scale={[scale, setScale]} />
         </Row>

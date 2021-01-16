@@ -100,7 +100,7 @@ main {
 }
 
 .settings-option {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .radio-group {
@@ -113,8 +113,8 @@ main {
   text-align: center;
 }
 
-.radio .point {
-  margin: 0 !important;
+.settings-option .row h5 {
+  margin: 0 0.5rem;
 }
 
 /* geist rewrites */
@@ -179,6 +179,11 @@ small {
 .radio .name {
   flex-direction: column-reverse;
   font-weight: normal !important;
+}
+
+.radio .point {
+  margin-right: 0 !important;
+  margin-top: 0.25rem;
 }
 
 /* geist rewrites */

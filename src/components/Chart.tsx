@@ -41,6 +41,8 @@ type ChartProps = {
   curve?: Curve;
   step?: number;
   day?: boolean;
+  minmax?: boolean;
+  grid?: boolean;
 };
 
 export enum yScaleT {
@@ -73,6 +75,8 @@ export function Chart({
   curve = Curve.Linear,
   step = 1,
   day = false,
+  minmax = false,
+  grid = false,
 }: ChartProps) {
   const { palette } = useTheme();
   margin.top = margin.top ?? 0;
@@ -233,49 +237,53 @@ export function Chart({
           />
         </Group>
         <Group>
-          <GridRows
-            scale={yScale}
-            width={innerWidth}
-            stroke={palette.accents_3}
-            strokeWidth={1}
-            strokeDasharray='4'
-            left={margin.left}
-            numTicks={4}
-          />
-          <Group>
+          {grid && (
+            <GridRows
+              scale={yScale}
+              width={innerWidth}
+              stroke={palette.accents_3}
+              strokeWidth={1}
+              strokeDasharray='4'
+              left={margin.left}
+              numTicks={4}
+            />
+          )}
+          {minmax && (
             <Group>
-              <Line
-                from={{ x: 0, y: maxPrice }}
-                to={{ x: width, y: maxPrice }}
-                stroke={palette.accents_4}
-                strokeWidth={1}
-                strokeDasharray={4}
-              />
-              <Line
-                from={{ x: 0, y: minPrice }}
-                to={{ x: width, y: minPrice }}
-                stroke={palette.accents_4}
-                strokeWidth={1}
-                strokeDasharray={4}
-              />
+              <Group>
+                <Line
+                  from={{ x: 0, y: maxPrice }}
+                  to={{ x: width, y: maxPrice }}
+                  stroke={palette.accents_4}
+                  strokeWidth={1}
+                  strokeDasharray={4}
+                />
+                <Line
+                  from={{ x: 0, y: minPrice }}
+                  to={{ x: width, y: minPrice }}
+                  stroke={palette.accents_4}
+                  strokeWidth={1}
+                  strokeDasharray={4}
+                />
+              </Group>
+              <Group>
+                <Text
+                  x={10}
+                  y={maxPrice - 10}
+                  fill={palette.accents_6}
+                  fontSize={14}>
+                  {formatPrice(maxY)}
+                </Text>
+                <Text
+                  x={10}
+                  y={minPrice + 25}
+                  fill={palette.accents_6}
+                  fontSize={14}>
+                  {formatPrice(minY)}
+                </Text>
+              </Group>
             </Group>
-            <Group>
-              <Text
-                x={10}
-                y={maxPrice - 10}
-                fill={palette.accents_6}
-                fontSize={14}>
-                {formatPrice(maxY)}
-              </Text>
-              <Text
-                x={10}
-                y={minPrice + 25}
-                fill={palette.accents_6}
-                fontSize={14}>
-                {formatPrice(minY)}
-              </Text>
-            </Group>
-          </Group>
+          )}
           <Axis
             axisClassName='axis-x'
             scale={xScale}

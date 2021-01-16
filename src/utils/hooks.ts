@@ -1,50 +1,17 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { set, get } from "idb-keyval";
 
-export function usePersistedState<TState>(
-  keyToPersistWith: string,
-  defaultState: TState
-) {
-  const [state, setState] = useState<TState>(defaultState);
+export function useIdb<T>(key: string, initialState: T) {
+  const [state, setState] = useState(initialState);
 
   useEffect(() => {
-    get<TState>(keyToPersistWith).then((retrievedState) =>
-      // If a value is retrieved then use it; otherwise default to defaultValue
-      setState(retrievedState ?? defaultState)
-    );
-  }, [keyToPersistWith, setState, defaultState]);
+    get(key).then((value) => value === undefined || setState(value));
+  }, [key]);
 
-  const setPersistedValue = useCallback(
-    (newValue: TState) => {
-      setState(newValue);
-      set(keyToPersistWith, newValue);
-    },
-    [keyToPersistWith, setState]
-  );
+  const setIdb = (value: T) => {
+    setState(value);
+    set(key, value);
+  };
 
-  return [state, setPersistedValue] as const;
+  return [state, setIdb] as const;
 }
-
-// export function usePersistedState<TState>(
-//   keyToPersistWith: string,
-//   defaultState: TState
-// ) {
-//   const [state, setState] = useState<TState | undefined>(undefined);
-
-//   useEffect(() => {
-//     get<TState>(keyToPersistWith).then((retrievedState) =>
-//       // If a value is retrieved then use it; otherwise default to defaultValue
-//       setState(retrievedState ?? defaultState)
-//     );
-//   }, [keyToPersistWith, setState, defaultState]);
-
-//   const setPersistedValue = useCallback(
-//     (newValue: TState) => {
-//       setState(newValue);
-//       set(keyToPersistWith, newValue);
-//     },
-//     [keyToPersistWith, setState]
-//   );
-
-//   return [state, setPersistedValue] as const;
-// }
