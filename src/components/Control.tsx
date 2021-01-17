@@ -13,7 +13,7 @@ import { RefreshCcw, TrendingUp } from "@geist-ui/react-icons";
 import { Coin, TimeRange, Pair, BTC_MIN_DATE } from "../utils/types";
 import { btn } from "../utils/themes";
 import { name } from "../utils/formats";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getFromDate, includesBtc } from "../utils/helpers";
 import { isBefore } from "date-fns";
 
@@ -43,11 +43,6 @@ export function Control({ pair, time }: ControlProps) {
 
   const [actualPair, setActualPair] = useState<Pair>(pair[0]),
     [actualTime, setActualTime] = useState<TimeRange>(time[0]);
-
-  useEffect(() => {
-    setActualPair(pair[0]);
-    setActualTime(time[0]);
-  }, [pair, time]);
 
   const handleBaseSelect = (val: string | string[]) => {
     const p = [val as Coin, actualPair[1]] as Pair;

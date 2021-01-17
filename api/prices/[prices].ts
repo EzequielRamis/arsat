@@ -79,9 +79,7 @@ export default async function (req: NowRequest, res: NowResponse) {
       else res.json(prices);
     })
     .catch((error) => {
-      res.json({
-        error,
-      });
+      res.status(error.response.status).json(error.toJSON());
     });
 }
 
@@ -116,13 +114,15 @@ async function getUsdArs(
   from: number = now,
   to: number = now
 ): Promise<Price[]> {
-  let today = await get(BLUELYTICS_API).then((res: any) => {
-    let price: Price = {
-      date: now,
-      value: parseFloat(res.data.blue.value_sell),
-    };
-    return price;
-  });
+  let today = await get(BLUELYTICS_API)
+    .then((res: any) => {
+      let price: Price = {
+        date: now,
+        value: parseFloat(res.data.blue.value_sell),
+      };
+      return price;
+    })
+    .catch((err) => Promise.reject(err));
   if (differenceInDays(to, now) > 0) to = now;
   if (isSameDay(from, now) && isSameDay(to, now)) return [today];
   else {
@@ -175,7 +175,8 @@ async function getUsdArs(
         }
         if (isSameDay(to, now)) prices[prices.length - 1] = today;
         return prices;
-      });
+      })
+      .catch((err) => Promise.reject(err));
   }
 }
 
@@ -192,26 +193,30 @@ async function getBtcUsd(
   if (isSameDay(from, now) && isSameDay(to, now)) {
     return await get(
       `${COINGECKO_API}/simple/price?ids=bitcoin&vs_currencies=usd`
-    ).then((res: any) => {
-      let today: Price = {
-        date: now,
-        value: parseFloat(res.data.bitcoin.usd),
-      };
-      return [today];
-    });
+    )
+      .then((res: any) => {
+        let today: Price = {
+          date: now,
+          value: parseFloat(res.data.bitcoin.usd),
+        };
+        return [today];
+      })
+      .catch((err) => Promise.reject(err));
   } else if (isSameDay(from, to)) {
     return await get(
       `${COINGECKO_API}/coins/bitcoin/history?date=${lightFormat(
         from,
         "dd-MM-yyyy"
       )}&localization=false`
-    ).then((res: any) => {
-      let price: Price = {
-        date: from,
-        value: res.data.market_data.current_price.usd,
-      };
-      return [price];
-    });
+    )
+      .then((res: any) => {
+        let price: Price = {
+          date: from,
+          value: res.data.market_data.current_price.usd,
+        };
+        return [price];
+      })
+      .catch((err) => Promise.reject(err));
   } else {
     let url = `${COINGECKO_API}/coins/bitcoin/market_chart/range?vs_currency=usd&from=${getUnixTime(
       from
@@ -230,7 +235,8 @@ async function getBtcUsd(
           return price;
         });
         return prices;
-      });
+      })
+      .catch((err) => Promise.reject(err));
   }
 }
 
