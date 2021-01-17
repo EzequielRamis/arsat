@@ -95,12 +95,11 @@ function Main({ theme, setTheme }: MainProps) {
       });
     // because of toast hook
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countdown, pairCache, prices.length, refetch, timeCache]);
+  }, [countdown, pairCache, refetch, timeCache]);
 
   useEffect(() => {
     refetchPrices();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pairCache, timeCache]);
+  }, [pairCache, refetchPrices, timeCache]);
 
   useEffect(() => {
     if (!live) setCounter(countdown);
