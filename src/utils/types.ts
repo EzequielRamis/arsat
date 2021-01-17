@@ -32,3 +32,9 @@ export enum TimeRange {
   Ytd = "YTD",
   Max = "Máximo",
 }
+
+export enum LiveCount {
+  Minute = 300,
+  Hour = 3600,
+  None = 0,
+}

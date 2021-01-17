@@ -63,8 +63,9 @@ type SettingsProps = {
   theme: [Theme, (t: Theme) => void];
   infoAlign: [InfoAlign, (a: InfoAlign) => void];
   minmax: [boolean, (m: boolean) => void];
-  grid: [boolean, (m: boolean) => void];
-  chartTheme: [ChartTheme, (m: ChartTheme) => void];
+  grid: [boolean, (g: boolean) => void];
+  chartTheme: [ChartTheme, (c: ChartTheme) => void];
+  live: [boolean, (l: boolean) => void];
 };
 
 export function Settings({
@@ -73,6 +74,7 @@ export function Settings({
   minmax,
   grid,
   chartTheme,
+  live,
 }: SettingsProps) {
   const settings = useModal(),
     openSettings = () => settings.setVisible(true),
@@ -96,6 +98,10 @@ export function Settings({
 
   const handleChartTheme = (val: string | string[]) => {
     chartTheme[1](val as ChartTheme);
+  };
+
+  const handleLive = (event: ToggleEvent) => {
+    live[1](event.target.checked);
   };
 
   return (
@@ -149,6 +155,12 @@ export function Settings({
                 <Select value={chartTheme[0]} onChange={handleChartTheme}>
                   {chartThemeOptions}
                 </Select>
+              </Row>
+            </Col>
+            <Col className='settings-option'>
+              <Row justify='space-between' align='middle'>
+                <Text h5>Actualización en vivo</Text>
+                <Toggle size='large' checked={live[0]} onChange={handleLive} />
               </Row>
             </Col>
           </Col>

@@ -12,6 +12,7 @@ import {
   BTC_MIN_DATE,
   Coin,
   isBtc,
+  LiveCount,
   Pair,
   Price,
   TimeRange,
@@ -19,12 +20,6 @@ import {
 
 export function step(s: number, p: Price[]) {
   return inverse(inverse(p).filter((_v, i, _a) => i % s === 0));
-}
-
-export function randomEnum<T>(anEnum: T): T[keyof T] {
-  const enumValues = (Object.values(anEnum) as unknown) as T[keyof T][];
-  const randomIndex = Math.floor(Math.random() * enumValues.length);
-  return enumValues[randomIndex];
 }
 
 export function pChange(data: Price[]) {
@@ -91,4 +86,18 @@ export function inverse<T>(arr: T[]) {
     newArray.push(arr[i]);
   }
   return newArray;
+}
+
+export function getLiveType(pair: Pair, time: TimeRange) {
+  if (
+    time !== TimeRange.Day &&
+    time !== TimeRange.Week &&
+    time !== TimeRange.Month &&
+    time !== TimeRange.Quarter
+  )
+    return LiveCount.None;
+  else if (pair[0] === pair[1]) return LiveCount.None;
+  else if (!includesBtc(pair)) return LiveCount.None;
+  else if (time === TimeRange.Day) return LiveCount.Minute;
+  else return LiveCount.Hour;
 }

@@ -44,8 +44,8 @@ main {
 }
 
 .info {
-  padding: 2rem;
-  padding-bottom: 0;
+  padding: 0 2rem;
+  padding-top: 2.5rem;
 }
 
 .info-name,
@@ -92,11 +92,16 @@ main {
   margin: auto 1rem;
 }
 
-.refetch-loading {
+.header {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  box-sizing: border-box;
+  height: 35px;
 }
 
 .settings-option {
@@ -111,6 +116,10 @@ main {
   flex: 1;
   justify-content: center;
   text-align: center;
+}
+
+.settings-option h5 {
+  font-weight: 500;
 }
 
 .settings-option .row h5 {
@@ -166,13 +175,12 @@ small {
   word-break: normal !important;
 }
 
-.refetch-loading .loading-container {
+.header .loading-container {
   display: flex !important;
 }
 
-.refetch-loading .loading {
+.header .loading {
   position: static !important;
-  margin: 1rem;
   justify-content: flex-end !important;
 }
 
@@ -184,6 +192,11 @@ small {
 .radio .point {
   margin-right: 0 !important;
   margin-top: 0.25rem;
+}
+
+.dot .label {
+  font-size: 0.8rem !important;
+  text-transform: none !important;
 }
 
 /* geist rewrites */

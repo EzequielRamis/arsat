@@ -8,18 +8,20 @@ import {
   Select,
   Text,
   Spacer,
+  Dot,
 } from "@geist-ui/react";
 import { RefreshCcw, TrendingUp } from "@geist-ui/react-icons";
-import { Coin, TimeRange, Pair, BTC_MIN_DATE } from "../utils/types";
+import { Coin, TimeRange, Pair, BTC_MIN_DATE, LiveCount } from "../utils/types";
 import { btn } from "../utils/themes";
 import { name } from "../utils/formats";
 import { useState } from "react";
-import { getFromDate, includesBtc } from "../utils/helpers";
+import { getFromDate, getLiveType, includesBtc } from "../utils/helpers";
 import { isBefore } from "date-fns";
 
 type ControlProps = {
   pair: [Pair, (p: Pair) => void];
   time: [TimeRange, (t: TimeRange) => void];
+  isLive: boolean;
 };
 
 const pairOptions = Object.values(Coin).map((c: Coin) => (
@@ -34,7 +36,7 @@ const timeOptions = Object.values(TimeRange).map((t: TimeRange) => (
   </Select.Option>
 ));
 
-export function Control({ pair, time }: ControlProps) {
+export function Control({ pair, time, isLive }: ControlProps) {
   const edit = useModal(),
     openEdit = () => edit.setVisible(true),
     closeEdit = () => edit.setVisible(false);
@@ -43,6 +45,8 @@ export function Control({ pair, time }: ControlProps) {
 
   const [actualPair, setActualPair] = useState<Pair>(pair[0]),
     [actualTime, setActualTime] = useState<TimeRange>(time[0]);
+
+  const live = getLiveType(actualPair, actualTime);
 
   const handleBaseSelect = (val: string | string[]) => {
     const p = [val as Coin, actualPair[1]] as Pair;
@@ -64,14 +68,13 @@ export function Control({ pair, time }: ControlProps) {
     if (actualPair.includes(Coin.BTC) && actualPair.includes(Coin.SAT)) {
       setToast({
         delay: 5000,
-        text:
-          "Intentá con otro par, porque un bitcoin siempre vale 10^8 satoshis.",
+        text: "Elegí otro par, porque un bitcoin siempre vale 10^8 satoshis.",
       });
     } else if (actualPair[0] === actualPair[1]) {
       let c = name(actualPair[0]).toLowerCase();
       setToast({
         delay: 5000,
-        text: `Intentá con otro par, porque un ${c} siempre vale un ${c}.`,
+        text: `Elegí otro par, porque un ${c} siempre vale un ${c}.`,
       });
     } else if (
       actualPair.includes(Coin.USD) &&
@@ -91,7 +94,7 @@ export function Control({ pair, time }: ControlProps) {
       setToast({
         delay: 5000,
         text:
-          "No es posible obtener datos sobre bitcoin de hace 10 años. Intentá con otro rango.",
+          "No es posible obtener datos sobre bitcoin de hace 10 años. Elegí otro rango.",
       });
     } else {
       closeEdit();
@@ -108,6 +111,17 @@ export function Control({ pair, time }: ControlProps) {
       <Modal {...edit.bindings}>
         <Modal.Title>Editar par</Modal.Title>
         <Modal.Content>
+          {isLive && (
+            <Row gap={1.5}>
+              {live === LiveCount.Minute ? (
+                <Dot type='success'>Actualización en vivo disponible</Dot>
+              ) : live === LiveCount.Hour ? (
+                <Dot type='warning'>Actualización disponible cada hora</Dot>
+              ) : (
+                <Dot type='error'>Actualización en vivo no disponible</Dot>
+              )}
+            </Row>
+          )}
           <Row>
             <Col offset={1}>
               <Col className='edit-select'>
