@@ -1,5 +1,5 @@
 import { ParentSize } from "@visx/responsive";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Price, Coin, TimeRange, Pair, LiveCount } from "../utils/types";
 import {
   dynChartTheme,
@@ -67,7 +67,7 @@ function Main({ theme, setTheme }: MainProps) {
     getPrices(pairCache, timeCache, now)
   );
 
-  const refetchPrices = useCallback(() => {
+  const refetchPrices = () => {
     console.log("refetching");
     const now = Date.now();
     refetch(getPrices(pairCache, timeCache, now) as AxiosRequestConfig)
@@ -93,13 +93,12 @@ function Main({ theme, setTheme }: MainProps) {
             delay: 5000,
           });
       });
-    // because of toast hook
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countdown, pairCache, refetch, timeCache]);
+  };
 
   useEffect(() => {
     refetchPrices();
-  }, [pairCache, refetchPrices, timeCache]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pairCache, timeCache]);
 
   useEffect(() => {
     if (!live) setCounter(countdown);
@@ -111,7 +110,7 @@ function Main({ theme, setTheme }: MainProps) {
         refetchPrices();
       } else setCounter(counter - 1);
     },
-    live && countdown !== LiveCount.None && !loading ? 1000 : null
+    live && countdown !== LiveCount.None && !loading && !error ? 1000 : null
   );
 
   return (
