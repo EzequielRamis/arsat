@@ -122,6 +122,18 @@ export function Control({ pair, time, isLive }: ControlProps) {
               )}
             </Row>
           )}
+          <Spacer />
+          <Row
+            align='top'
+            justify='center'
+            gap={1}
+            style={{ flexDirection: "column" }}>
+            <Text small>Rango de tiempo</Text>
+            <Select value={actualTime} onChange={handleTimeSelect}>
+              {timeOptions}
+            </Select>
+          </Row>
+          <Spacer />
           <Row>
             <Col offset={1}>
               <Col className='edit-select'>
@@ -145,17 +157,6 @@ export function Control({ pair, time, isLive }: ControlProps) {
                 Dar vuelta
               </Button>
             </Row>
-          </Row>
-          <Spacer />
-          <Row
-            align='top'
-            justify='center'
-            gap={1}
-            style={{ flexDirection: "column" }}>
-            <Text small>Rango de tiempo</Text>
-            <Select value={actualTime} onChange={handleTimeSelect}>
-              {timeOptions}
-            </Select>
           </Row>
         </Modal.Content>
         <Modal.Action passive onClick={closeEdit}>
