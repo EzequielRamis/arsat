@@ -18,7 +18,6 @@ const BLUELYTICS_API = "https://api.bluelytics.com.ar/v2/latest";
 const COINGECKO_API = "https://api.coingecko.com/api/v3";
 const ARS_MIN_DATE = parse("2002-01-11", "yyyy-MM-dd", new Date());
 const BTC_MIN_DATE = parse("2013-04-30", "yyyy-MM-dd", new Date());
-const now = Date.now();
 
 interface Price {
   date: number;
@@ -39,6 +38,7 @@ enum Pair {
 }
 
 export default async function (req: NowRequest, res: NowResponse) {
+  const now = Date.now();
   const pairValue = req.query.prices.toString().toUpperCase();
   const pair = Pair[pairValue as keyof typeof Pair];
   let { from, to } = req.query;
@@ -111,9 +111,10 @@ function queryError(from: number, to: number, pair: Pair, res: NowResponse) {
 }
 
 async function getUsdArs(
-  from: number = now,
-  to: number = now
+  from: number = Date.now(),
+  to: number = Date.now()
 ): Promise<Price[]> {
+  const now = Date.now();
   let today = await get(BLUELYTICS_API)
     .then((res: any) => {
       let price: Price = {
@@ -187,9 +188,10 @@ async function retry(from: number, to: number) {
 }
 
 async function getBtcUsd(
-  from: number = now,
-  to: number = now
+  from: number = Date.now(),
+  to: number = Date.now()
 ): Promise<Price[]> {
+  const now = Date.now();
   if (isSameDay(from, now) && isSameDay(to, now)) {
     return await get(
       `${COINGECKO_API}/simple/price?ids=bitcoin&vs_currencies=usd`
@@ -241,8 +243,8 @@ async function getBtcUsd(
 }
 
 async function getBtcArs(
-  from: number = now,
-  to: number = now
+  from: number = Date.now(),
+  to: number = Date.now()
 ): Promise<Price[]> {
   const usdars = await getUsdArs(from, to);
   const btcusd = await getBtcUsd(from, to);
@@ -275,50 +277,50 @@ function satoshi(p: Price[]) {
 }
 
 async function getSatUsd(
-  from: number = now,
-  to: number = now
+  from: number = Date.now(),
+  to: number = Date.now()
 ): Promise<Price[]> {
   return satoshi(await getBtcUsd(from, to));
 }
 
 async function getSatArs(
-  from: number = now,
-  to: number = now
+  from: number = Date.now(),
+  to: number = Date.now()
 ): Promise<Price[]> {
   return satoshi(await getBtcArs(from, to));
 }
 
 async function getArsUsd(
-  from: number = now,
-  to: number = now
+  from: number = Date.now(),
+  to: number = Date.now()
 ): Promise<Price[]> {
   return inverse(await getUsdArs(from, to));
 }
 
 async function getUsdBtc(
-  from: number = now,
-  to: number = now
+  from: number = Date.now(),
+  to: number = Date.now()
 ): Promise<Price[]> {
   return inverse(await getBtcUsd(from, to));
 }
 
 async function getArsBtc(
-  from: number = now,
-  to: number = now
+  from: number = Date.now(),
+  to: number = Date.now()
 ): Promise<Price[]> {
   return inverse(await getBtcArs(from, to));
 }
 
 async function getUsdSat(
-  from: number = now,
-  to: number = now
+  from: number = Date.now(),
+  to: number = Date.now()
 ): Promise<Price[]> {
   return inverse(await getSatUsd(from, to));
 }
 
 async function getArsSat(
-  from: number = now,
-  to: number = now
+  from: number = Date.now(),
+  to: number = Date.now()
 ): Promise<Price[]> {
   return inverse(await getSatArs(from, to));
 }
