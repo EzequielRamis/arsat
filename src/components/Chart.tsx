@@ -198,8 +198,8 @@ export function Chart({
         <defs>
           <linearGradient id='date-gradient'>
             <stop offset='0%' stopColor={palette.background} stopOpacity='1' />
-            <stop offset='30%' stopColor={palette.background} stopOpacity='0' />
-            <stop offset='70%' stopColor={palette.background} stopOpacity='0' />
+            <stop offset='20%' stopColor={palette.background} stopOpacity='0' />
+            <stop offset='80%' stopColor={palette.background} stopOpacity='0' />
             <stop
               offset='100%'
               stopColor={palette.background}

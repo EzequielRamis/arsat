@@ -12,16 +12,20 @@ export function Scale({ scale }: ScaleProps) {
     if (s === scale[0])
       return {
         color: palette.background,
-        backgroundColor: palette.success,
+        backgroundColor: palette.link,
       };
     else
       return {
-        color: palette.success,
+        color: palette.link,
         backgroundColor: "transparent",
       };
   };
   return (
-    <ButtonGroup vertical size='medium' type='success' ghost>
+    <ButtonGroup
+      vertical
+      size='medium'
+      ghost
+      style={{ borderColor: palette.link }}>
       <Button
         style={scaleSelected(yScaleT.Log)}
         onClick={() => scale[1](yScaleT.Log)}>

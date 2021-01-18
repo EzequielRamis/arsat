@@ -8,6 +8,7 @@ import {
   Text,
   Toggle,
   Select,
+  Divider,
 } from "@geist-ui/react";
 import { Settings as SettingsIcon } from "@geist-ui/react-icons";
 import { btn, ChartTheme } from "../utils/themes";
@@ -112,7 +113,7 @@ export function Settings({
       <Modal {...settings.bindings} wrapClassName='settings-modal'>
         <Modal.Title>Ajustes</Modal.Title>
         <Modal.Content>
-          <Col>
+          <Col className='settings-wrapper'>
             <Col className='settings-option'>
               <Text h5>Tema</Text>
               <Radio.Group
@@ -135,6 +136,19 @@ export function Settings({
             </Col>
             <Col className='settings-option'>
               <Row justify='space-between' align='middle'>
+                <Text h5>Color del gráfico</Text>
+                <Select value={chartTheme[0]} onChange={handleChartTheme}>
+                  {chartThemeOptions}
+                </Select>
+              </Row>
+            </Col>
+          </Col>
+          <Col>
+            <Divider y={3} />
+          </Col>
+          <Col className='settings-wrapper'>
+            <Col className='settings-option'>
+              <Row justify='space-between' align='middle'>
                 <Text h5>Mostrar precio máximo y mínimo</Text>
                 <Toggle
                   size='large'
@@ -147,14 +161,6 @@ export function Settings({
               <Row justify='space-between' align='middle'>
                 <Text h5>Mostrar escala</Text>
                 <Toggle size='large' checked={grid[0]} onChange={handleGrid} />
-              </Row>
-            </Col>
-            <Col className='settings-option'>
-              <Row justify='space-between' align='middle'>
-                <Text h5>Color del gráfico</Text>
-                <Select value={chartTheme[0]} onChange={handleChartTheme}>
-                  {chartThemeOptions}
-                </Select>
               </Row>
             </Col>
             <Col className='settings-option'>

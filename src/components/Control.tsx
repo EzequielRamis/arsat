@@ -106,10 +106,10 @@ export function Control({ pair, time, isLive }: ControlProps) {
   return (
     <>
       <Button icon={<TrendingUp />} style={btn} onClick={openEdit}>
-        Editar
+        Modificar
       </Button>
       <Modal {...edit.bindings}>
-        <Modal.Title>Editar par</Modal.Title>
+        <Modal.Title>Modificar variables</Modal.Title>
         <Modal.Content>
           {isLive && (
             <Row gap={1.5}>
@@ -133,7 +133,7 @@ export function Control({ pair, time, isLive }: ControlProps) {
               {timeOptions}
             </Select>
           </Row>
-          <Spacer />
+          <Spacer y={0.5} />
           <Row>
             <Col offset={1}>
               <Col className='edit-select'>
@@ -149,7 +149,7 @@ export function Control({ pair, time, isLive }: ControlProps) {
                 </Select>
               </Col>
             </Col>
-            <Row align='middle' justify='center' gap={1}>
+            <Row align='middle' justify='center' gap={1} className='flip-pair'>
               <Button
                 icon={<RefreshCcw />}
                 style={btn}

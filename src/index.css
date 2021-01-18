@@ -1,12 +1,3 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 #root {
   width: 100%;
   height: 100vh;
@@ -126,6 +117,10 @@ main {
   margin: 0 0.5rem;
 }
 
+.flip-pair {
+  margin-top: 1.5rem;
+}
+
 /* geist rewrites */
 
 h1,
@@ -157,6 +152,7 @@ small {
 .backdrop .btn .text {
   position: static !important;
   line-height: 1 !important;
+  text-transform: none;
 }
 
 .control .btn-group {
@@ -197,6 +193,14 @@ small {
 .dot .label {
   font-size: 0.8rem !important;
   text-transform: none !important;
+}
+
+.settings-wrapper .settings-option:last-child {
+  margin-bottom: 0 !important;
+}
+
+.toggle.checked {
+  background-color: #448aff !important;
 }
 
 /* geist rewrites */
