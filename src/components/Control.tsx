@@ -69,12 +69,14 @@ export function Control({ pair, time, isLive }: ControlProps) {
       setToast({
         delay: 5000,
         text: "Elegí otro par, porque un bitcoin siempre vale 10^8 satoshis.",
+        type: "secondary",
       });
     } else if (actualPair[0] === actualPair[1]) {
       let c = name(actualPair[0]).toLowerCase();
       setToast({
         delay: 5000,
         text: `Elegí otro par, porque un ${c} siempre vale un ${c}.`,
+        type: "secondary",
       });
     } else if (
       actualPair.includes(Coin.USD) &&
@@ -84,7 +86,8 @@ export function Control({ pair, time, isLive }: ControlProps) {
       setToast({
         delay: 5000,
         text:
-          "Intentá con un rango de tiempo mayor a una semana para este par.",
+          "No hay datos suficientes de este par en un rango menor a un mes.",
+        type: "secondary",
       });
     } else if (
       includesBtc(actualPair) &&
@@ -95,6 +98,7 @@ export function Control({ pair, time, isLive }: ControlProps) {
         delay: 5000,
         text:
           "No es posible obtener datos sobre bitcoin de hace 10 años. Elegí otro rango.",
+        type: "secondary",
       });
     } else {
       closeEdit();
@@ -116,7 +120,7 @@ export function Control({ pair, time, isLive }: ControlProps) {
               {live === LiveCount.Minute ? (
                 <Dot type='success'>Actualización en vivo disponible</Dot>
               ) : live === LiveCount.Hour ? (
-                <Dot type='warning'>Actualización disponible cada hora</Dot>
+                <Dot type='warning'>Actualización a cada hora disponible</Dot>
               ) : (
                 <Dot type='error'>Actualización en vivo no disponible</Dot>
               )}

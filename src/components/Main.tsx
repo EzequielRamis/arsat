@@ -29,17 +29,19 @@ import { AxiosRequestConfig } from "axios";
 import { useIdb, useInterval } from "../utils/hooks";
 
 type MainProps = {
-  theme: Theme;
-  setTheme: (t: Theme) => void;
+  theme: [Theme, (t: Theme) => void];
 };
 
 const now = Date.now();
 
-function Main({ theme, setTheme }: MainProps) {
+function Main({ theme }: MainProps) {
   const [prices, setPrices] = useState<Price[]>([]);
 
-  const [pairCache, setPairCache] = useIdb<Pair>("pair", [Coin.ARS, Coin.SAT]);
-  const [timeCache, setTimeCache] = useIdb<TimeRange>("time", TimeRange.Day);
+  const [pairCache, setPairCache] = useIdb<Pair>("pair", [Coin.BTC, Coin.ARS]);
+  const [timeCache, setTimeCache] = useIdb<TimeRange>(
+    "time",
+    TimeRange.Quarter
+  );
 
   const [pair, setPair] = useState<Pair>(pairCache);
   const [time, setTime] = useState<TimeRange>(timeCache);
@@ -50,7 +52,7 @@ function Main({ theme, setTheme }: MainProps) {
   const [minmax, setMinmax] = useIdb("min-max", false);
   const [grid, setGrid] = useIdb("grid", false);
   const [chartTheme, setChartTheme] = useIdb("chart-theme", ChartTheme.Dynamic);
-  const [live, setLive] = useIdb<boolean>("live", true);
+  const [live, setLive] = useIdb<boolean>("live", false);
 
   const countdown = getLiveType(pairCache, timeCache);
   const [counter, setCounter] = useState<number>(countdown);
@@ -68,7 +70,6 @@ function Main({ theme, setTheme }: MainProps) {
   );
 
   const refetchPrices = () => {
-    console.log("refetching");
     const now = Date.now();
     refetch(getPrices(pairCache, timeCache, now) as AxiosRequestConfig)
       .then(({ data }) => {
@@ -88,7 +89,7 @@ function Main({ theme, setTheme }: MainProps) {
         console.error(err);
         if (prices.length !== 0 && err.message !== undefined)
           setToast({
-            type: "error",
+            type: "secondary",
             text: "No se pudo obtener información.",
             delay: 5000,
           });
@@ -120,7 +121,7 @@ function Main({ theme, setTheme }: MainProps) {
           <Loading />
         ) : (
           error && (
-            <Note type='error' label='error' filled className='fetch-error'>
+            <Note type='secondary' label='error' filled className='fetch-error'>
               Ocurrió un problema con la conexión. Intentalo más tarde.
             </Note>
           )
@@ -167,7 +168,7 @@ function Main({ theme, setTheme }: MainProps) {
           </div>
           <Row justify='center' align='middle' className='control'>
             <Settings
-              theme={[theme, setTheme]}
+              theme={theme}
               infoAlign={[infoAlign, setInfoAlign]}
               minmax={[minmax, setMinmax]}
               grid={[grid, setGrid]}

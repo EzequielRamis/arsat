@@ -7,13 +7,12 @@ import {
   addDays,
   subDays,
   isBefore,
-  differenceInDays,
+  differenceInMinutes,
 } from "date-fns";
 import { NowRequest, NowResponse } from "@vercel/node";
 import get from "axios";
 
-const AMBITO_API =
-  "https://mercados.ambito.com/dolar/informal/historico-general";
+const AMBITO_API = "https://mercados.ambito.com";
 const BLUELYTICS_API = "https://api.bluelytics.com.ar/v2/latest";
 const COINGECKO_API = "https://api.coingecko.com/api/v3";
 const ARS_MIN_DATE = parse("2002-01-11", "yyyy-MM-dd", new Date());
@@ -44,7 +43,7 @@ export default async function (req: NowRequest, res: NowResponse) {
   let { from, to } = req.query;
   const f = from ? parseInt(from.toString()) : now;
   const t = to ? parseInt(to.toString()) : now;
-  if (queryError(f, t, pair, res)) res.end();
+  if (queryError(f, t, pair, res, now)) res.end();
   (async (p) => {
     switch (p) {
       case Pair.USDARS:
@@ -68,22 +67,30 @@ export default async function (req: NowRequest, res: NowResponse) {
       case Pair.SATARS:
         return await getSatArs(f, t);
       default:
-        return Promise.reject("Invalid pair");
+        res.status(404).json({ error: "Invalid pair" });
     }
   })(pair)
     .then((prices) => {
-      if (prices.length === 0)
-        res.status(404).json({
-          error: "Prices not found",
-        });
-      else res.json(prices);
+      if (prices !== undefined) {
+        if (prices.length === 0)
+          res.status(404).json({
+            error: "Prices not found",
+          });
+        else res.json(prices);
+      }
     })
     .catch((error) => {
-      res.status(error.response.status).json(error.toJSON());
+      res.status(500).json({ error: error });
     });
 }
 
-function queryError(from: number, to: number, pair: Pair, res: NowResponse) {
+function queryError(
+  from: number,
+  to: number,
+  pair: Pair,
+  res: NowResponse,
+  now: number
+) {
   if (pair === Pair.USDARS || pair === Pair.ARSUSD) {
     if (isBefore(from, ARS_MIN_DATE)) {
       res.status(404).json({
@@ -107,36 +114,36 @@ function queryError(from: number, to: number, pair: Pair, res: NowResponse) {
     });
     return true;
   }
+  if (isBefore(now, from) || isBefore(now, to)) {
+    res.status(404).json({
+      error: "There is no data about the future",
+    });
+    return true;
+  }
   return false;
 }
 
-async function getUsdArs(
-  from: number = Date.now(),
-  to: number = Date.now()
-): Promise<Price[]> {
+async function getUsdArs(from: number = Date.now(), to: number = Date.now()) {
   const now = Date.now();
-  let today = await get(BLUELYTICS_API)
-    .then((res: any) => {
+  if (isSameDay(from, now) && isSameDay(to, now))
+    return await get(BLUELYTICS_API).then((res: any) => {
       let price: Price = {
         date: now,
         value: parseFloat(res.data.blue.value_sell),
       };
-      return price;
-    })
-    .catch((err) => Promise.reject(err));
-  if (differenceInDays(to, now) > 0) to = now;
-  if (isSameDay(from, now) && isSameDay(to, now)) return [today];
+      return [price];
+    });
   else {
-    let url = `${AMBITO_API}/${lightFormat(from, "dd-MM-yyyy")}/${lightFormat(
-      addDays(to, 1),
+    let url = `${AMBITO_API}/dolar/informal/historico-general/${lightFormat(
+      from,
       "dd-MM-yyyy"
-    )}`;
+    )}/${lightFormat(addDays(to, 1), "dd-MM-yyyy")}`;
     return await get(url)
       .then((res) => res.data)
-      .then((res: any) => {
-        res.shift();
+      .then(async (res: any) => {
+        res.shift(); // first item is a table header
         if (res.length === 0) return retry(from, to);
-        let prices = res
+        let prices: Price[] = res
           .map((item: string[]) => {
             let price: Price = {
               date: parse(item[0], "dd-MM-yyyy", new Date()).getTime(),
@@ -146,6 +153,7 @@ async function getUsdArs(
           })
           .reverse();
         if (!isSameDay(prices[0].date, from)) return retry(from, to);
+        // looping for misinformation
         for (let index = 0; index < prices.length; index++) {
           const actual = prices[index];
           const last = prices.length - 1;
@@ -166,7 +174,8 @@ async function getUsdArs(
               };
               prices.splice(index + 1, 0, filledPrice);
             }
-          } else if (!isSameDay(prices[last].date, to)) {
+          } // same here
+          else if (!isSameDay(prices[last].date, to)) {
             let filledPrice: Price = {
               date: addDays(prices[last].date, 1).getTime(),
               value: actual.value,
@@ -174,51 +183,40 @@ async function getUsdArs(
             prices.splice(index + 1, 0, filledPrice);
           }
         }
-        if (isSameDay(to, now)) prices[prices.length - 1] = today;
+        // replace last filled price with today's one
+        if (isSameDay(to, now)) {
+          const today = await get(BLUELYTICS_API).then((res: any) => {
+            let price: Price = {
+              date: now,
+              value: parseFloat(res.data.blue.value_sell),
+            };
+            return price;
+          });
+          prices[prices.length - 1] = today;
+        }
         return prices;
-      })
-      .catch((err) => Promise.reject(err));
+      });
   }
 }
 
 async function retry(from: number, to: number) {
-  let r = await getUsdArs(subDays(from, 1).getTime(), to);
+  let r: Price[] = await getUsdArs(subDays(from, 1).getTime(), to);
   r.shift();
   return r;
 }
 
-async function getBtcUsd(
-  from: number = Date.now(),
-  to: number = Date.now()
-): Promise<Price[]> {
+async function getBtcUsd(from: number = Date.now(), to: number = Date.now()) {
   const now = Date.now();
-  if (isSameDay(from, now) && isSameDay(to, now)) {
+  if (from === to || Math.abs(differenceInMinutes(from, now)) < 5) {
     return await get(
       `${COINGECKO_API}/simple/price?ids=bitcoin&vs_currencies=usd`
-    )
-      .then((res: any) => {
-        let today: Price = {
-          date: now,
-          value: parseFloat(res.data.bitcoin.usd),
-        };
-        return [today];
-      })
-      .catch((err) => Promise.reject(err));
-  } else if (isSameDay(from, to)) {
-    return await get(
-      `${COINGECKO_API}/coins/bitcoin/history?date=${lightFormat(
-        from,
-        "dd-MM-yyyy"
-      )}&localization=false`
-    )
-      .then((res: any) => {
-        let price: Price = {
-          date: from,
-          value: res.data.market_data.current_price.usd,
-        };
-        return [price];
-      })
-      .catch((err) => Promise.reject(err));
+    ).then((res: any) => {
+      let today: Price = {
+        date: from,
+        value: parseFloat(res.data.bitcoin.usd),
+      };
+      return [today];
+    });
   } else {
     let url = `${COINGECKO_API}/coins/bitcoin/market_chart/range?vs_currency=usd&from=${getUnixTime(
       from
@@ -226,9 +224,6 @@ async function getBtcUsd(
     return await get(url)
       .then((res: any) => res.data.prices)
       .then((res: number[][]) => {
-        if (res.length === 0) {
-          throw new Error("Invalid date arguments");
-        }
         let prices = res.map((item: number[]) => {
           let price: Price = {
             date: item[0],
@@ -237,15 +232,11 @@ async function getBtcUsd(
           return price;
         });
         return prices;
-      })
-      .catch((err) => Promise.reject(err));
+      });
   }
 }
 
-async function getBtcArs(
-  from: number = Date.now(),
-  to: number = Date.now()
-): Promise<Price[]> {
+async function getBtcArs(from: number = Date.now(), to: number = Date.now()) {
   const usdars = await getUsdArs(from, to);
   const btcusd = await getBtcUsd(from, to);
   let btcars: Price[] = [];
@@ -276,51 +267,30 @@ function satoshi(p: Price[]) {
   return mapValue(p, (v: number) => v / Math.pow(10, 8));
 }
 
-async function getSatUsd(
-  from: number = Date.now(),
-  to: number = Date.now()
-): Promise<Price[]> {
+async function getSatUsd(from: number = Date.now(), to: number = Date.now()) {
   return satoshi(await getBtcUsd(from, to));
 }
 
-async function getSatArs(
-  from: number = Date.now(),
-  to: number = Date.now()
-): Promise<Price[]> {
+async function getSatArs(from: number = Date.now(), to: number = Date.now()) {
   return satoshi(await getBtcArs(from, to));
 }
 
-async function getArsUsd(
-  from: number = Date.now(),
-  to: number = Date.now()
-): Promise<Price[]> {
+async function getArsUsd(from: number = Date.now(), to: number = Date.now()) {
   return inverse(await getUsdArs(from, to));
 }
 
-async function getUsdBtc(
-  from: number = Date.now(),
-  to: number = Date.now()
-): Promise<Price[]> {
+async function getUsdBtc(from: number = Date.now(), to: number = Date.now()) {
   return inverse(await getBtcUsd(from, to));
 }
 
-async function getArsBtc(
-  from: number = Date.now(),
-  to: number = Date.now()
-): Promise<Price[]> {
+async function getArsBtc(from: number = Date.now(), to: number = Date.now()) {
   return inverse(await getBtcArs(from, to));
 }
 
-async function getUsdSat(
-  from: number = Date.now(),
-  to: number = Date.now()
-): Promise<Price[]> {
+async function getUsdSat(from: number = Date.now(), to: number = Date.now()) {
   return inverse(await getSatUsd(from, to));
 }
 
-async function getArsSat(
-  from: number = Date.now(),
-  to: number = Date.now()
-): Promise<Price[]> {
+async function getArsSat(from: number = Date.now(), to: number = Date.now()) {
   return inverse(await getSatArs(from, to));
 }

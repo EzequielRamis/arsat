@@ -62,13 +62,16 @@ export function getPrices(pair: Pair, r: TimeRange, now: number) {
 }
 
 export function dynStep(pair: Pair, time: TimeRange) {
-  if (includesBtc(pair) && time === TimeRange.Month) return 5;
-  if (time === TimeRange.TwoYears) return 2;
-  if (time === TimeRange.FiveYears) return 5;
-  if (time === TimeRange.TenYears) return 10;
-  if (time === TimeRange.Max)
-    if (includesBtc(pair)) return 10;
-    else return 25;
+  if (includesBtc(pair)) {
+    if (time === TimeRange.Ytd) return 2;
+    if (time === TimeRange.Month) return 5;
+    if (time === TimeRange.Max) return 15;
+  }
+  if (time === TimeRange.Year) return 2;
+  if (time === TimeRange.TwoYears) return 4;
+  if (time === TimeRange.FiveYears) return 10;
+  if (time === TimeRange.TenYears) return 20;
+  if (time === TimeRange.Max) return 30;
   return 1;
 }
 
@@ -97,6 +100,8 @@ export function getLiveType(pair: Pair, time: TimeRange) {
   )
     return LiveCount.None;
   else if (pair[0] === pair[1]) return LiveCount.None;
+  else if (pair.includes(Coin.BTC) && pair.includes(Coin.SAT))
+    return LiveCount.None;
   else if (!includesBtc(pair)) return LiveCount.None;
   else if (time === TimeRange.Day) return LiveCount.Minute;
   else return LiveCount.Hour;

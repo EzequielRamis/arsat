@@ -9,7 +9,7 @@ const status = {
   errorLighter: "#f7d4d6",
   errorLight: "#ff4d6a",
   error: "#ea3e5b",
-  errorDark: "#bf2640",
+  errorDark: "#a82138",
 
   warningLighter: "#ffa64d",
   warningLight: "#f7931a",
@@ -45,10 +45,10 @@ export const night: GeistUIThemesPalette = {
   background: "#000",
   foreground: "#fff",
   selection: "#f81ce5",
-  secondary: "#888",
+  secondary: "#a82138",
   code: "#79ffe1",
   border: "#333",
-  link: "#448AFF",
+  link: "#448aff",
 };
 
 export const sunset: GeistUIThemesPalette = {
@@ -65,10 +65,10 @@ export const sunset: GeistUIThemesPalette = {
   background: "#1e1933",
   foreground: "#f4f2ff",
   selection: "#f81ce5",
-  secondary: "#888",
+  secondary: "#a82138",
   code: "#79ffe1",
   border: "#544d77",
-  link: "#448AFF",
+  link: "#448aff",
 };
 
 export const day: GeistUIThemesPalette = {
@@ -85,7 +85,7 @@ export const day: GeistUIThemesPalette = {
   background: "#fff",
   foreground: "#000",
   selection: "#79ffe1",
-  secondary: "#666",
+  secondary: "#a82138",
   code: "#f81ce5",
   border: "#eaeaea",
   link: "#0070f3",
@@ -95,7 +95,7 @@ export enum ChartTheme {
   Dynamic = "dyn",
   Orange = "#e28117",
   Red = " #ea3e5b",
-  Blue = "#448AFF",
+  Blue = "#448aff",
   Green = " #17cc96",
 }
 

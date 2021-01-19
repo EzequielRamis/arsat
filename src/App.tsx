@@ -5,7 +5,7 @@ import { useIdb } from "./utils/hooks";
 import Main from "./components/Main";
 
 function App() {
-  const [theme, setTheme] = useIdb("theme", Theme.Day);
+  const [theme, setTheme] = useIdb("theme", Theme.Sunset);
 
   return (
     <GeistProvider
@@ -14,7 +14,7 @@ function App() {
           theme === Theme.Day ? day : theme === Theme.Sunset ? sunset : night,
       }}>
       <CssBaseline />
-      <Main theme={theme} setTheme={setTheme} />
+      <Main theme={[theme, setTheme]} />
     </GeistProvider>
   );
 }
