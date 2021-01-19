@@ -11,17 +11,9 @@ import {
 import { Chart, yScaleT, Curve } from "./Chart";
 import { Info } from "./Info";
 import { InfoAlign, Settings, Theme } from "./Settings";
-import {
-  Loading,
-  Note,
-  Row,
-  Button,
-  useToasts,
-  Dot,
-  useTheme,
-} from "@geist-ui/react";
-import { Info as About } from "@geist-ui/react-icons";
-import { btn, ChartTheme } from "../utils/themes";
+import About from "./About";
+import { Loading, Note, Row, useToasts, Dot, useTheme } from "@geist-ui/react";
+import { ChartTheme } from "../utils/themes";
 import useAxios from "axios-hooks";
 import { Control } from "./Control";
 import { Scale } from "./Scale";
@@ -40,7 +32,7 @@ function Main({ theme }: MainProps) {
   const [pairCache, setPairCache] = useIdb<Pair>("pair", [Coin.BTC, Coin.ARS]);
   const [timeCache, setTimeCache] = useIdb<TimeRange>(
     "time",
-    TimeRange.Quarter
+    TimeRange.Semester
   );
 
   const [pair, setPair] = useState<Pair>(pairCache);
@@ -183,10 +175,7 @@ function Main({ theme }: MainProps) {
             <Scale scale={[scale, setScale]} />
           </Row>
           <Row justify='end' className='about'>
-            <Button
-              icon={<About />}
-              style={{ ...btn, padding: "0.25rem", margin: 0 }}
-            />
+            <About />
           </Row>
         </>
       )}
