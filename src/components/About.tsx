@@ -27,7 +27,10 @@ export default function About() {
           </Text>
           <Text>Para saber más, hacé click en:</Text>
           <Text>
-            <Link block icon href='https://github.com/EzequielRamis/arsat'>
+            <Link
+              block
+              icon
+              href='https://github.com/EzequielRamis/arsat#arsat-'>
               Más información
             </Link>
           </Text>
