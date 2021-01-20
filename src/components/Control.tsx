@@ -46,7 +46,7 @@ export function Control({ pair, time, isLive }: ControlProps) {
   const [actualPair, setActualPair] = useState<Pair>(pair[0]),
     [actualTime, setActualTime] = useState<TimeRange>(time[0]);
 
-  const live = getLiveType(actualPair, actualTime);
+  const live = getLiveType(actualPair);
 
   const handleBaseSelect = (val: string | string[]) => {
     const p = [val as Coin, actualPair[1]] as Pair;
@@ -119,8 +119,6 @@ export function Control({ pair, time, isLive }: ControlProps) {
             <Row gap={1.5}>
               {live === LiveCount.Minute ? (
                 <Dot type='success'>Actualización en vivo disponible</Dot>
-              ) : live === LiveCount.Hour ? (
-                <Dot type='warning'>Actualización a cada hora disponible</Dot>
               ) : (
                 <Dot type='error'>Actualización en vivo no disponible</Dot>
               )}

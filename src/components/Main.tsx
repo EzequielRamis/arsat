@@ -46,7 +46,7 @@ function Main({ theme }: MainProps) {
   const [chartTheme, setChartTheme] = useIdb("chart-theme", ChartTheme.Dynamic);
   const [live, setLive] = useIdb<boolean>("live", false);
 
-  const countdown = getLiveType(pairCache, timeCache);
+  const countdown = getLiveType(pairCache);
   const [counter, setCounter] = useState<number>(countdown);
 
   const min = Math.floor(counter / 60);

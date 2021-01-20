@@ -8,6 +8,7 @@ import {
   subDays,
   isBefore,
   differenceInMinutes,
+  differenceInDays,
 } from "date-fns";
 import { NowRequest, NowResponse } from "@vercel/node";
 import get from "axios";
@@ -207,16 +208,17 @@ async function retry(from: number, to: number) {
 
 async function getBtcUsd(from: number = Date.now(), to: number = Date.now()) {
   const now = Date.now();
+  const today = await get(
+    `${COINGECKO_API}/simple/price?ids=bitcoin&vs_currencies=usd`
+  ).then((res: any) => {
+    let t: Price = {
+      date: to,
+      value: parseFloat(res.data.bitcoin.usd),
+    };
+    return t;
+  });
   if (from === to || Math.abs(differenceInMinutes(from, now)) < 5) {
-    return await get(
-      `${COINGECKO_API}/simple/price?ids=bitcoin&vs_currencies=usd`
-    ).then((res: any) => {
-      let today: Price = {
-        date: from,
-        value: parseFloat(res.data.bitcoin.usd),
-      };
-      return [today];
-    });
+    return [today];
   } else {
     let url = `${COINGECKO_API}/coins/bitcoin/market_chart/range?vs_currency=usd&from=${getUnixTime(
       from
@@ -231,6 +233,9 @@ async function getBtcUsd(from: number = Date.now(), to: number = Date.now()) {
           };
           return price;
         });
+        if (isSameDay(to, now) && Math.abs(differenceInDays(from, to)) > 90) {
+          prices.push(today);
+        }
         return prices;
       });
   }

@@ -91,18 +91,9 @@ export function inverse<T>(arr: T[]) {
   return newArray;
 }
 
-export function getLiveType(pair: Pair, time: TimeRange) {
-  if (
-    time !== TimeRange.Day &&
-    time !== TimeRange.Week &&
-    time !== TimeRange.Month &&
-    time !== TimeRange.Quarter
-  )
-    return LiveCount.None;
-  else if (pair[0] === pair[1]) return LiveCount.None;
-  else if (pair.includes(Coin.BTC) && pair.includes(Coin.SAT))
-    return LiveCount.None;
-  else if (!includesBtc(pair)) return LiveCount.None;
-  else if (time === TimeRange.Day) return LiveCount.Minute;
-  else return LiveCount.Hour;
+export function getLiveType(pair: Pair) {
+  if (pair[0] === pair[1]) return LiveCount.None;
+  if (pair.includes(Coin.BTC) && pair.includes(Coin.SAT)) return LiveCount.None;
+  if (includesBtc(pair)) return LiveCount.Minute;
+  return LiveCount.None;
 }
