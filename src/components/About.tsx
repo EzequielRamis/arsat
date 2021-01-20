@@ -21,7 +21,11 @@ export default function About() {
             acá:
           </Text>
           <Text>
-            <Link block icon href='https://github.com/EzequielRamis/arsat'>
+            <Link
+              block
+              icon
+              target='_blank'
+              href='https://github.com/EzequielRamis/arsat'>
               Repositorio
             </Link>
           </Text>
@@ -30,6 +34,7 @@ export default function About() {
             <Link
               block
               icon
+              target='_blank'
               href='https://github.com/EzequielRamis/arsat#arsat-'>
               Más información
             </Link>
