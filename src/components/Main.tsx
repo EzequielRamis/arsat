@@ -41,10 +41,10 @@ function Main({ theme }: MainProps) {
   const [scale, setScale] = useIdb<yScaleT>("scale", yScaleT.Linear);
 
   const [infoAlign, setInfoAlign] = useIdb("info-align", InfoAlign.Center);
-  const [minmax, setMinmax] = useIdb("min-max", false);
+  const [minmax, setMinmax] = useIdb("min-max", true);
   const [grid, setGrid] = useIdb("grid", false);
   const [chartTheme, setChartTheme] = useIdb("chart-theme", ChartTheme.Dynamic);
-  const [live, setLive] = useIdb<boolean>("live", false);
+  const [live, setLive] = useIdb<boolean>("live", true);
 
   const countdown = getLiveType(pairCache);
   const [counter, setCounter] = useState<number>(countdown);
