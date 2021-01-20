@@ -23,9 +23,9 @@ Este proyecto es, principalmente, un [PWA][pwa] que permite ver cotizaciones, al
 | to        | [number][date] | [Date.now()][now] |
 
 Ejemplos:
-- /api/prices/usdars devuelve el último precio del dólar en pesos
+- [/api/prices/usdars](https://arsat.ramis.ar/api/prices/usdars) devuelve el último precio del dólar en pesos
 
-- /api/prices/btcusd?from=1609815660000&to=1610852460000 devuelve una lista de precios del bitcoin en dólares desde el 5 de enero de 2021 hasta el 17 de enero de 2021
+- [/api/prices/btcusd?from=1609815660000&to=1610852460000](https://arsat.ramis.ar/api/prices/btcusd?from=1609815660000&to=1610852460000) devuelve una lista de precios del bitcoin en dólares desde el 5 de enero de 2021 hasta el 17 de enero de 2021
 
 ## Fuentes
 - Cotización histórica del dólar blue: [Ámbito][ambito]

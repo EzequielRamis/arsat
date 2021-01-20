@@ -17,24 +17,21 @@ export default function About() {
         <Modal.Title>Acerca de</Modal.Title>
         <Modal.Content>
           <Text>
-            Arsat es un proyecto Open Source, cuyo código fuente se puede ver
-            acá:
+            Arsat es un proyecto Open Source, cuyo código fuente e información
+            se puede ver acá:
           </Text>
           <Text>
-            <Link block icon href='https://github.com/EzequielRamis/arsat'>
+            <Link
+              block
+              icon
+              target='_blank'
+              href='https://github.com/EzequielRamis/arsat'>
               Repositorio
             </Link>
           </Text>
-          <Text>Para saber más, hacé click en:</Text>
           <Text>
-            <Link block icon href='https://github.com/EzequielRamis/arsat'>
-              Más información
-            </Link>
-          </Text>
-          <Text>
-            Aclaración: Este sitio funciona como una aplicación nativa, asi que
-            si no te lo descargaste aún, instalalo haciendo click en las
-            opciones de tu navegador, y en "Agregar a la pantalla principal".
+            Este sitio funciona como una aplicación móvil nativa, asi que si no
+            te lo descargaste aún, instalalo desde las opciones de tu navegador.
           </Text>
         </Modal.Content>
         <Modal.Action passive onClick={closeAbout}>
