@@ -40,6 +40,13 @@ pub enum Coin {
 
 pub type Pair = (Coin, Coin);
 
+#[derive(Debug, Serialize)]
+pub struct HttpError {
+    pub status: u16,
+    pub title: String,
+    pub detail: String,
+}
+
 pub async fn fetch(url: &str) -> Result<Value, Box<dyn Error>> {
     let json: Value = serde_json::from_str(&get(url).await?.text().await?)?;
     Ok(json)
@@ -47,10 +54,6 @@ pub async fn fetch(url: &str) -> Result<Value, Box<dyn Error>> {
 
 pub fn is_same_day(left: DateTime<Utc>, right: DateTime<Utc>) -> bool {
     left.ordinal() == right.ordinal() && left.year() == right.year()
-}
-
-pub fn is_before(left: DateTime<Utc>, right: DateTime<Utc>) -> bool {
-    left.timestamp() < right.timestamp()
 }
 
 pub fn add_days(date: DateTime<Utc>, days: i64) -> DateTime<Utc> {
