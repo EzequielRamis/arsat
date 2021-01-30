@@ -1,6 +1,5 @@
 # Arsat <!-- omit in toc --> 
 
-## Índice  <!-- omit in toc --> 
 - [Acerca de](#acerca-de)
 - [API](#api)
 - [Fuentes](#fuentes)
@@ -17,13 +16,15 @@ Este proyecto es, principalmente, un [PWA][pwa] que permite ver cotizaciones, al
 ## API
 - GET /api/prices/[base][cotizacion]
 
-| Parámetro | Tipo           | Default           |
-| --------- | -------------- | ----------------- |
-| from      | [number][date] | [Date.now()][now] |
-| to        | [number][date] | [Date.now()][now] |
+| Parámetro | Tipo                            | Default                                |
+| --------- | ------------------------------- | -------------------------------------- |
+| from      | [UNIX Time][date] *milisegundos | [UNIX Time][date] *milisegundos actual |
+| to        | [UNIX Time][date] *milisegundos | [UNIX Time][date] *milisegundos actual |
 
 Ejemplos:
 - [/api/prices/usdars](https://arsat.ramis.ar/api/prices/usdars) devuelve el último precio del dólar en pesos
+
+- [/api/prices/arssat?from=1609815660000](https://arsat.ramis.ar/api/prices/arssat?from=1609815660000) devuelve una lista de cuántos satoshis valen un peso desde el 5 de enero de 2021 hasta ahora
 
 - [/api/prices/btcusd?from=1609815660000&to=1610852460000](https://arsat.ramis.ar/api/prices/btcusd?from=1609815660000&to=1610852460000) devuelve una lista de precios del bitcoin en dólares desde el 5 de enero de 2021 hasta el 17 de enero de 2021
 
@@ -37,7 +38,7 @@ Ejemplos:
 [dolar]: https://bluelytics.com.ar
 [blue]: https://es.wikipedia.org/wiki/Dolar_blue
 [coingecko]: https://www.coingecko.com/en/api
-[date]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTime
+[date]: https://en.wikipedia.org/wiki/Unix_time
 [now]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now
 
 ---
