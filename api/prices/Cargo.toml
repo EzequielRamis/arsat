@@ -1,5 +1,5 @@
 [package]
-name = "arsat-slf"
+name = "arsat"
 version = "0.1.0"
 authors = [ "Ezequiel Ramis <ezequielramis.hello@gmail.com>" ]
 edition = "2018"
@@ -27,10 +27,10 @@ now_lambda = "*"
   version = "0.20"
   features = [ "derive" ]
 
-[lib]
-name = "utils"
-path = "utils.rs"
-
 [[bin]]
 name = "_prices_"
 path = "/api/prices/[prices].rs"
+
+[lib]
+name = "utils"
+path = "_utils.rs"

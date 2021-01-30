@@ -16,7 +16,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ee2a4ec343196209d6594e19543ae87a39f96d5534d7174822a3ad825dd6ed7e"
 
 [[package]]
-name = "arsat-slf"
+name = "arsat"
 version = "0.1.0"
 dependencies = [
  "async-recursion",
