@@ -29,7 +29,7 @@ now_lambda = "*"
 
 [[bin]]
 name = "_prices_"
-path = "/api/prices/[prices].rs"
+path = "[prices].rs"
 
 [lib]
 name = "utils"

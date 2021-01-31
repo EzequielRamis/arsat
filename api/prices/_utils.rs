@@ -41,10 +41,27 @@ pub enum Coin {
 pub type Pair = (Coin, Coin);
 
 #[derive(Debug, Serialize)]
-pub struct HttpError {
+pub struct HttpError<'http> {
     pub status: u16,
-    pub title: String,
-    pub detail: String,
+    pub title: &'http str,
+    pub detail: &'http str,
+}
+
+impl<'http> HttpError<'http> {
+    pub fn new(status: StatusCode, title: &'http str, detail: &'http str) -> Self {
+        HttpError {
+            status: status.as_u16(),
+            title,
+            detail,
+        }
+    }
+
+    pub fn res(&self) -> Response<String> {
+        now_res(
+            StatusCode::from_u16(self.status).unwrap(),
+            serde_json::to_string(&self).unwrap(),
+        )
+    }
 }
 
 pub async fn fetch(url: &str) -> Result<Value, Box<dyn Error>> {

@@ -1,6 +1,6 @@
 use async_recursion::async_recursion;
 use chrono::{Date, DateTime, Duration, NaiveDate, NaiveDateTime, Utc};
-use http::StatusCode;
+use http::{Response, StatusCode};
 use now_lambda::{error::NowError, lambda, IntoResponse, Request};
 use std::str::FromStr;
 use std::vec;
@@ -16,39 +16,37 @@ fn main() -> Result<(), Error> {
 #[tokio::main]
 async fn handler(request: Request) -> Result<impl IntoResponse, NowError> {
     let now = Utc::now();
-    let uri = request.uri().to_string();
-    let url = reqwest::Url::parse(&uri);
-    if url.is_err() {
-        return Ok(now_res(StatusCode::INTERNAL_SERVER_ERROR, "".to_string()));
-    }
-    let url = url.unwrap();
+    let url = {
+        let uri = request.uri().to_string();
+        let url = reqwest::Url::parse(&uri);
+        if url.is_err() {
+            let err = HttpError::new(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Internal server error",
+                "The URL could not be parsed",
+            );
+            return Ok(err.res());
+        }
+        url.unwrap()
+    };
     let pair: Pair = {
         let path = url.path_segments().unwrap().last().unwrap().to_uppercase();
         if path.len() != 6 {
-            let err = HttpError {
-                status: 400,
-                title: "Invalid pair argument".to_string(),
-                detail: "A pair must be six chars long".to_string(),
-            };
-            return Ok(now_res(
-                StatusCode::BAD_REQUEST,
-                serde_json::to_string(&err).unwrap(),
-            ));
+            let err = HttpError::new(
+                StatusCode::NOT_FOUND,
+                "Invalid pair argument",
+                "A pair must be six chars long",
+            );
+            return Ok(err.res());
         }
         let (base, quote) = {
             let res = path.split_at(3);
             let b = Coin::from_str(res.0);
             let q = Coin::from_str(res.1);
             if b.is_err() || q.is_err() {
-                let err = HttpError {
-                    status: 404,
-                    title: "Invalid pair argument".to_string(),
-                    detail: format!("There is no data about {}/{}", res.0, res.1),
-                };
-                return Ok(now_res(
-                    StatusCode::NOT_FOUND,
-                    serde_json::to_string(&err).unwrap(),
-                ));
+                let detail = &format!("There is no data about {}/{}", res.0, res.1);
+                let err = HttpError::new(StatusCode::NOT_FOUND, "Invalid pair argument", detail);
+                return Ok(err.res());
             } else {
                 (b.unwrap(), q.unwrap())
             }
@@ -56,130 +54,88 @@ async fn handler(request: Request) -> Result<impl IntoResponse, NowError> {
         (base, quote)
     };
     let mut query = url.query_pairs();
-    let from = {
-        let res = query.find(|q| q.0 == "from");
+
+    let mut get_param = |param: &str| -> Result<DateTime<Utc>, Response<String>> {
+        let err = {
+            let detail = &format!("The '{}' date could not be parsed", param);
+            let err = HttpError::new(
+                StatusCode::BAD_REQUEST,
+                "Invalid time range argument",
+                detail,
+            );
+            err.res()
+        };
+        let res = query.find(|q| q.0 == param);
         if res.is_none() {
-            now
+            Ok(now)
         } else {
             let t = res.unwrap().1.to_string();
             if t.len() == 0 {
-                let err = HttpError {
-                    status: 400,
-                    title: "Invalid time range argument".to_string(),
-                    detail: "The 'from' date could not be parsed".to_string(),
-                };
-                return Ok(now_res(
-                    StatusCode::BAD_REQUEST,
-                    serde_json::to_string(&err).unwrap(),
-                ));
+                return Err(err);
             }
             let (secs, nsecs) = t.split_at(t.len() - 3);
             let secs = secs.parse::<i64>();
             let nsecs = nsecs.parse::<u32>();
             if secs.is_err() || nsecs.is_err() {
-                let err = HttpError {
-                    status: 400,
-                    title: "Invalid time range argument".to_string(),
-                    detail: "The 'from' date could not be parsed".to_string(),
-                };
-                return Ok(now_res(
-                    StatusCode::BAD_REQUEST,
-                    serde_json::to_string(&err).unwrap(),
-                ));
+                return Err(err);
             }
-            DateTime::<Utc>::from_utc(
+            Ok(DateTime::<Utc>::from_utc(
                 NaiveDateTime::from_timestamp(secs.unwrap(), nsecs.unwrap()),
                 Utc,
-            )
+            ))
         }
     };
-    let to = {
-        let res = query.find(|q| q.0 == "to");
-        if res.is_none() {
-            now
-        } else {
-            let t = res.unwrap().1.to_string();
-            if t.len() == 0 {
-                let err = HttpError {
-                    status: 400,
-                    title: "Invalid time range argument".to_string(),
-                    detail: "The 'to' date could not be parsed".to_string(),
-                };
-                return Ok(now_res(
-                    StatusCode::BAD_REQUEST,
-                    serde_json::to_string(&err).unwrap(),
-                ));
-            }
-            let (secs, nsecs) = t.split_at(t.len() - 3);
-            let secs = secs.parse::<i64>();
-            let nsecs = nsecs.parse::<u32>();
-            if secs.is_err() || nsecs.is_err() {
-                let err = HttpError {
-                    status: 400,
-                    title: "Invalid time range argument".to_string(),
-                    detail: "The 'to' date could not be parsed".to_string(),
-                };
-                return Ok(now_res(
-                    StatusCode::BAD_REQUEST,
-                    serde_json::to_string(&err).unwrap(),
-                ));
-            }
-            DateTime::<Utc>::from_utc(
-                NaiveDateTime::from_timestamp(secs.unwrap(), nsecs.unwrap()),
-                Utc,
-            )
+
+    let from = match get_param("from") {
+        Ok(param) => param,
+        Err(err) => {
+            return Ok(err);
         }
     };
+    let to = match get_param("to") {
+        Ok(param) => param,
+        Err(err) => {
+            return Ok(err);
+        }
+    };
+
     match pair {
         (Coin::USD, Coin::ARS) | (Coin::ARS, Coin::USD) => {
             if from.timestamp() < ARS_MIN_DATE {
-                let err = HttpError {
-                    status: 404,
-                    title: "Invalid time range argument".to_string(),
-                    detail: "There is no data about Argentine Peso before Januanry 11th 2002"
-                        .to_string(),
-                };
-                return Ok(now_res(
+                let err = HttpError::new(
                     StatusCode::NOT_FOUND,
-                    serde_json::to_string(&err).unwrap(),
-                ));
+                    "Invalid time range argument",
+                    "There is no data about Argentine Peso before Januanry 11th 2002",
+                );
+                return Ok(err.res());
             }
         }
         _ => {
             if from.timestamp() < BTC_MIN_DATE {
-                let err = HttpError {
-                    status: 404,
-                    title: "Invalid time range argument".to_string(),
-                    detail: "There is no data about Bitcoin before April 30th 2013".to_string(),
-                };
-                return Ok(now_res(
+                let err = HttpError::new(
                     StatusCode::NOT_FOUND,
-                    serde_json::to_string(&err).unwrap(),
-                ));
+                    "Invalid time range argument",
+                    "There is no data about Bitcoin before April 30th 2013",
+                );
+                return Ok(err.res());
             }
         }
     }
     if to < from {
-        let err = HttpError {
-            status: 400,
-            title: "Invalid time range argument".to_string(),
-            detail: "The 'from' data must be before 'to' date".to_string(),
-        };
-        return Ok(now_res(
+        let err = HttpError::new(
             StatusCode::BAD_REQUEST,
-            serde_json::to_string(&err).unwrap(),
-        ));
+            "Invalid time range argument",
+            "The 'from' data must be before 'to' date",
+        );
+        return Ok(err.res());
     }
     if now < from || now < to {
-        let err = HttpError {
-            status: 400,
-            title: "Invalid time range argument".to_string(),
-            detail: "There is no data about the future".to_string(),
-        };
-        return Ok(now_res(
+        let err = HttpError::new(
             StatusCode::BAD_REQUEST,
-            serde_json::to_string(&err).unwrap(),
-        ));
+            "Invalid time range argument",
+            "There is no data about the future",
+        );
+        return Ok(err.res());
     }
     let prices = match pair {
         (Coin::ARS, Coin::USD) => get_ars_usd(from, to).await,
@@ -193,19 +149,13 @@ async fn handler(request: Request) -> Result<impl IntoResponse, NowError> {
         (Coin::SAT, Coin::ARS) => get_sat_ars(from, to).await,
         (Coin::SAT, Coin::USD) => get_sat_usd(from, to).await,
         _ => {
-            let err = HttpError {
-                status: 404,
-                title: "Invalid pair argument".to_string(),
-                detail: format!(
-                    "There is no data about {}/{}",
-                    pair.0.to_string(),
-                    pair.1.to_string()
-                ),
-            };
-            return Ok(now_res(
-                StatusCode::NOT_FOUND,
-                serde_json::to_string(&err).unwrap(),
-            ));
+            let detail = &format!(
+                "There is no data about {}/{}",
+                pair.0.to_string(),
+                pair.1.to_string()
+            );
+            let err = HttpError::new(StatusCode::NOT_FOUND, "Invalid pair argument", detail);
+            return Ok(err.res());
         }
     };
     let response = match prices {
@@ -223,15 +173,9 @@ async fn handler(request: Request) -> Result<impl IntoResponse, NowError> {
             now_res(StatusCode::OK, json)
         }
         Err(err) => {
-            let err = HttpError {
-                status: 502,
-                title: "Bad Gateway".to_string(),
-                detail: err.to_string(),
-            };
-            now_res(
-                StatusCode::BAD_GATEWAY,
-                serde_json::to_string(&err).unwrap(),
-            )
+            let detail = &err.to_string();
+            let err = HttpError::new(StatusCode::BAD_GATEWAY, "Bad Gateway", detail);
+            err.res()
         }
     };
 
@@ -266,6 +210,25 @@ async fn get_usd_ars(from: DateTime<Utc>, to: DateTime<Utc>) -> Result<Prices, E
         if res.len() == 0 {
             return retry(from, to).await;
         }
+        res.reverse();
+
+        let first_date = {
+            let date = Date::<Utc>::from_utc(
+                NaiveDate::parse_from_str(
+                    res[0][0]
+                        .as_str()
+                        .ok_or(Error::from("Ámbito date parsing error"))?,
+                    "%d-%m-%Y",
+                )?,
+                Utc,
+            )
+            .and_hms(0, 0, 0);
+            let date = date + Duration::hours(3);
+            date
+        };
+        if !is_same_day(first_date, from) {
+            return retry(from, to).await;
+        };
         let mut prices = res
             .iter()
             .map(|item| {
@@ -288,10 +251,7 @@ async fn get_usd_ars(from: DateTime<Utc>, to: DateTime<Utc>) -> Result<Prices, E
                 Ok(Price { date, value })
             })
             .collect::<Result<Prices, Error>>()?;
-        prices.reverse();
-        if !is_same_day(prices[0].date, from) {
-            return retry(from, to).await;
-        };
+
         let mut index: usize = 0;
         // looping for misinformation
         while index < prices.len() {
