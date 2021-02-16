@@ -9,6 +9,7 @@ import {
   isBefore,
   differenceInMinutes,
   differenceInDays,
+  addHours,
 } from "date-fns";
 import { NowRequest, NowResponse } from "@vercel/node";
 import get from "axios";
@@ -147,7 +148,10 @@ async function getUsdArs(from: number = Date.now(), to: number = Date.now()) {
         let prices: Price[] = res
           .map((item: string[]) => {
             let price: Price = {
-              date: parse(item[0], "dd-MM-yyyy", new Date()).getTime(),
+              date: addHours(
+                parse(item[0], "dd-MM-yyyy", new Date()),
+                3
+              ).getTime(),
               value: parseFloat(item[2].replace(/,/g, ".")),
             };
             return price;
