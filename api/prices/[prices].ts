@@ -187,6 +187,9 @@ async function getUsdArs(from: number = Date.now(), to: number = Date.now()) {
             };
             prices.splice(index + 1, 0, filledPrice);
           }
+          if (prices[index].value === 0) {
+            prices[index].value = prices[index - 1].value;
+          }
         }
         // replace last filled price with today's one
         if (isSameDay(to, now)) {
