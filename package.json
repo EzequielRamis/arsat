@@ -1,79 +1,82 @@
 {
-  "name": "arsat",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@geist-ui/react": "^2.1.0-canary.2",
-    "@geist-ui/react-icons": "^1.0.1",
-    "@types/d3-format": "^2.0.0",
-    "@types/node": "^12.0.0",
-    "@types/react": "^16.9.53",
-    "@types/react-dom": "^16.9.8",
-    "@visx/axis": "^1.3.0",
-    "@visx/clip-path": "^1.0.0",
-    "@visx/curve": "^1.0.0",
-    "@visx/event": "^1.3.0",
-    "@visx/gradient": "^1.0.0",
-    "@visx/grid": "^1.3.0",
-    "@visx/group": "^1.0.0",
-    "@visx/pattern": "^1.1.0",
-    "@visx/react-spring": "^1.3.0",
-    "@visx/responsive": "^1.3.0",
-    "@visx/scale": "^1.3.0",
-    "@visx/shape": "^1.3.0",
-    "@visx/text": "^1.3.0",
-    "@visx/tooltip": "^1.3.0",
-    "axios": "^0.21.1",
-    "axios-hooks": "^2.2.0",
-    "d3-array": "^2.9.1",
-    "d3-format": "^2.0.0",
-    "date-fns": "^2.16.1",
-    "idb-keyval": "^5.0.1",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "react-scripts": "4.0.1",
-    "react-spring": "^8.0.27",
-    "typescript": "^4.0.3",
-    "web-vitals": "^0.2.4",
-    "workbox-background-sync": "^5.1.3",
-    "workbox-broadcast-update": "^5.1.3",
-    "workbox-cacheable-response": "^5.1.3",
-    "workbox-core": "^5.1.3",
-    "workbox-expiration": "^5.1.3",
-    "workbox-google-analytics": "^5.1.3",
-    "workbox-navigation-preload": "^5.1.3",
-    "workbox-precaching": "^5.1.3",
-    "workbox-range-requests": "^5.1.3",
-    "workbox-routing": "^5.1.3",
-    "workbox-strategies": "^5.1.3",
-    "workbox-streams": "^5.1.3"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "@types/d3-array": "^2.8.0",
-    "@vercel/node": "^1.8.5"
-  }
+        "name": "arsat",
+        "version": "1.0.0",
+        "dependencies": {
+                "@geist-ui/react": "2.1.0-canary.2",
+                "@geist-ui/react-icons": "1.0.1",
+                "@types/d3-format": "^2.0.0",
+                "@types/node": "^12.0.0",
+                "@types/react": "^17.0.0",
+                "@types/react-dom": "^17.0.0",
+                "@visx/axis": "^1.3.0",
+                "@visx/clip-path": "^1.0.0",
+                "@visx/curve": "^1.0.0",
+                "@visx/event": "^1.3.0",
+                "@visx/gradient": "^1.0.0",
+                "@visx/grid": "^1.3.0",
+                "@visx/group": "^1.0.0",
+                "@visx/pattern": "^1.1.0",
+                "@visx/react-spring": "^1.3.0",
+                "@visx/responsive": "^1.3.0",
+                "@visx/scale": "^1.3.0",
+                "@visx/shape": "^1.3.0",
+                "@visx/text": "^1.3.0",
+                "@visx/tooltip": "^1.3.0",
+                "axios": "^0.21.1",
+                "axios-hooks": "^2.2.0",
+                "d3-array": "^2.9.1",
+                "d3-format": "^2.0.0",
+                "date-fns": "^2.16.1",
+                "idb-keyval": "^5.0.1",
+                "react": "^17.0.0",
+                "react-dom": "^17.0.0",
+                "react-scripts": "5.x",
+                "react-spring": "^8.0.27",
+                "typescript": "^4.0.3",
+                "web-vitals": "^0.2.4",
+                "workbox-background-sync": "^5.1.3",
+                "workbox-broadcast-update": "^5.1.3",
+                "workbox-cacheable-response": "^5.1.3",
+                "workbox-core": "^5.1.3",
+                "workbox-expiration": "^5.1.3",
+                "workbox-google-analytics": "^5.1.3",
+                "workbox-navigation-preload": "^5.1.3",
+                "workbox-precaching": "^5.1.3",
+                "workbox-range-requests": "^5.1.3",
+                "workbox-routing": "^5.1.3",
+                "workbox-strategies": "^5.1.3",
+                "workbox-streams": "^5.1.3"
+        },
+        "scripts": {
+                "start": "react-scripts start",
+                "build": "react-scripts build",
+                "test": "react-scripts test",
+                "eject": "react-scripts eject"
+        },
+        "eslintConfig": {
+                "extends": [
+                        "react-app",
+                        "react-app/jest"
+                ]
+        },
+        "browserslist": {
+                "production": [
+                        ">0.2%",
+                        "not dead",
+                        "not op_mini all"
+                ],
+                "development": [
+                        "last 1 chrome version",
+                        "last 1 firefox version",
+                        "last 1 safari version"
+                ]
+        },
+        "devDependencies": {
+                "@types/d3-array": "^2.8.0",
+                "@vercel/node": "^1.8.5"
+        },
+        "resolutions": {
+                "@types/react": "17.0.0",
+                "@types/react-dom": "17.0.0"
+        }
 }
