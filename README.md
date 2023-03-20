@@ -1,5 +1,7 @@
 # Arsat <!-- omit in toc --> 
 
+PD: Ya no anda la API de Coingecko que utilicé de forma gratuita, por lo que archivo el repo.
+
 - [Acerca de](#acerca-de)
 - [API](#api)
 - [Fuentes](#fuentes)
